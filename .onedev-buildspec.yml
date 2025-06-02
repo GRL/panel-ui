@@ -1,0 +1,14 @@
+version: 38
+jobs:
+- name: Push to Github
+  steps:
+  - !PushRepository
+    name: push
+    remoteUrl: https://github.com/GRL/panel-ui
+    passwordSecret: github-panel-ui
+    force: false
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 14400
