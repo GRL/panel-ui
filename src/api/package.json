@@ -18,7 +18,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "axios": "^0.21.1"
+    "@openapitools/openapi-generator-cli": "^2.20.2",
+    "axios": "^0.21.4"
   },
   "devDependencies": {
     "@types/node": "^12.11.5",

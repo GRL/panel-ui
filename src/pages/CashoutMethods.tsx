@@ -1,11 +1,9 @@
 import React, {useEffect, useState} from 'react'
 
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {GRLWidgetSettings} from "@/Widget.tsx"
-import {CashoutMethodsResponse, WalletApi} from "@/api"
-import {CashoutMethod} from "@/models/CashoutMethod.ts";
+import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
+import {CashoutMethodOut, CashoutMethodsResponse, WalletApi} from "@/api"
 
-const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethod }> = ({cashout_method}) => {
+const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethodOut }> = ({cashout_method}) => {
 
     return (
         <Card key={cashout_method.id}>
@@ -37,8 +35,7 @@ const CashoutMethodsPage: React.FC<GRLWidgetSettings> = ({settings}) => {
         <div className="grid grid-cols-3 gap-1 p-1">
             {
                 cashoutMethods.map((m, index) => {
-                    const cm = new CashoutMethod(m);
-                    return <CashoutMethodPreview key={index} cashout_method={cm} />;
+                    return <CashoutMethodPreview key={index} cashout_method={m}/>;
                 })
             }
         </div>

@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react'
 
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {GRLWidgetSettings} from "@/Widget.tsx"
 import {CashoutMethodsResponse, WalletApi} from "@/api"
-import {CashoutMethod} from "@/models/CashoutMethod.ts";
+import {CashoutMethodOut} from "@/api";
+import {useAppSelector} from "@/hooks.ts";
 
-const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethod }> = ({cashout_method}) => {
+const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethodOut }> = ({cashout_method}) => {
 
     console.log("CashoutMethodPreview", cashout_method)
 
@@ -22,12 +22,14 @@ const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethod }> = ({cash
     )
 }
 
-const CommunityPage: React.FC<GRLWidgetSettings> = ({settings}) => {
+const CommunityPage = () => {
+    const app = useAppSelector(state => state.app)
+
     const [cashoutMethods, setCashoutMethods] = useState([]);
 
     useEffect(() => {
         const x = new WalletApi();
-        x.getCashoutMethodsProductIdCashoutMethodsGet(settings.bpid, settings.bpuid)
+        x.getCashoutMethodsProductIdCashoutMethodsGet(app.bpid, app.bpuid)
             .then(res => {
                 const data: CashoutMethodsResponse = res.data;
                 setCashoutMethods(data.cashout_methods);
@@ -39,8 +41,7 @@ const CommunityPage: React.FC<GRLWidgetSettings> = ({settings}) => {
         <div className="grid grid-cols-3 gap-1 p-1">
             {
                 cashoutMethods.map((m, index) => {
-                    const cm = new CashoutMethod(m);
-                    return <CashoutMethodPreview key={index} cashout_method={cm} />;
+                    return <CashoutMethodPreview key={index} cashout_method={m} />;
                 })
             }
         </div>

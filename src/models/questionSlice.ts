@@ -1,10 +1,9 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 import type {RootState} from '@/store'
-import {UpkQuestion} from "@/api/models/upk-question.ts"
+import {UpkQuestion} from "@/api";
 
 const initialState: UpkQuestion[] = []
 
-// Create the slice and pass in the initial state
 const questionSlice = createSlice({
     name: 'questions',
     initialState,
