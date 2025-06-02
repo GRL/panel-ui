@@ -1,66 +1,143 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
-import type {RootState} from '@/store'
-import {selectQuestionById} from "@/models/questionSlice.ts"
+// import type {RootState} from '@/store'
 // import {Answer} from "@/models/answer.ts";
 // import {stringify} from "querystring";
 // import {PatternType} from "@/types.ts";
+// import {UserQuestionAnswerIn} from "@/api"
+import {RootState} from '@/store'; // your root state type
+import {PatternValidation, UpkQuestion} from "@/api";
+import {Answer} from "@/models/answer.ts"
 
-// import { enableMapSet } from 'immer'
-// enableMapSet()
 
-// const initialState = new Map<string, Answer>();
-const initialState = {};
+interface Answer {
+    values: string[];
+    error_msg: string;
+
+    complete: boolean;
+    processing: boolean;
+}
+
+type AnswersState = {
+    [id: string]: Answer;
+};
+
+const initialState: AnswersState = {};
+
 
 const answerSlice = createSlice({
     name: 'answers',
     initialState,
     reducers: {
-        addAnswer(state, action: PayloadAction<{questionId: string, val: string}>) {
-            let question = selectQuestionById(state, action.payload.questionId)
-            let val = action.payload.val.trim();
 
-            console.log("addAnswer:", question, val)
+        addAnswer(state, action: PayloadAction<{ question: UpkQuestion, val: string }>) {
+            let question: UpkQuestion = action.payload.question;
+            let val: string = action.payload.val.trim();
+            let answer: Answer = state[question.question_id] ?? {
+                values: [],
+                error_msg: "",
+                complete: false,
+                processing: false
+            } as Answer;
 
-            // switch (question.questionType) {
-            //     case "TE":
-            //         let answer: Answer = {
-            //             questionId: question.questionId,
-            //             values: [val]
-            //         } as Answer
-            //
-            //         break
-            //         // return {question.questionId: answer}
-            //
-            //     case "MC":
-            //         let answer = selectAnswerByQuestionId(questionId)
-            //
-            //         if (answer) {
-            //             let current_values: string[] = answer.values
-            //         } else {
-            //             let current_values: string[] = []
-            //         }
-            //
-            //         current_values.push(val)
-            //         let new_answer = new Anwer(question.questionId, val);
-            //
-            //         return {question.questionId: new_answer}
-            //
-            //     default:
-            //         throw new Error("Incorrect Question Type provided");
-            // }
+            /*
+            If the question is MC, validate:
+            - validate selector SA vs MA (1 selected vs >1 selected)
+            - the answers match actual codes in the choices
+            - validate configuration.max_select
+            - validate choices.exclusive
 
-            // this.validate()
-        },
+            If the question is TE, validate that:
+                - configuration.max_length
+                - validation.patterns
+            */
 
-        setAnswer(state, action: PayloadAction<{ questionId: string, val: string }>) {
-            const {questionId, val} = action.payload
-            console.log(questionId, val)
-            const existingQuestion = state.find(q => q.questionId === action.payload.questionId)
-            if (existingQuestion) {
-                // existingQuestion.addAnswer(action.payload.val)
-                // existingQuestion.error_msg = "yess"
+            switch (question.question_type) {
+                case "MC":
+                    answer.values.push(val);
+                    break
             }
-        }
+
+            switch (question.question_type) {
+                case "TE":
+                    answer.values = [val]
+
+                    if (answer.values.length > 1) {
+                        answer.error_msg = "Only one answer allowed"
+                    }
+
+                    let answer_text: string = answer.values[0]
+
+                    if (answer_text.length <= 0) {
+                        answer.error_msg = "Must provide answer"
+                    }
+
+                    const max_length: number = (question.configuration ?? {})["max_length"] ?? 100000
+
+                    if (answer_text.length > max_length) {
+                        answer.error_msg = "Answer longer than allowed"
+                    }
+
+                    const patterns: PatternValidation[] = (question.validation ?? {})["patterns"] ?? []
+                    patterns.forEach((pv) => {
+                        let re = new RegExp(pv.pattern)
+                        if (answer_text.search(re) == -1) {
+                            answer.error_msg = pv.message
+                        }
+                    })
+
+                    answer.error_msg = ""
+                    break
+
+                case "MC":
+                    if (answer.values.length == 0) {
+                        answer.error_msg = "MC question with no selected answers"
+                    }
+
+                    const choice_codes: string[] = question.choices?.map((c) => c.choice_id) ?? [];
+
+                    switch (question.selector) {
+                        case "SA":
+                            if (answer.values.length > 1) {
+                                answer.error_msg = "Single Answer MC question with >1 selected answers"
+                            }
+                            break
+                        case "MA":
+                            if (answer.values.length > choice_codes.length) {
+                                answer.error_msg = "More options selected than allowed"
+                            }
+                            break
+                    }
+
+                    // if (!every(qa.values, (v) => {
+                    //     return includes(choice_codes, v["value"])
+                    // })) {
+                    //     this.error_msg = "Invalid Options Selected"
+                    //     return false
+                    // }
+                    //
+                    // const max_select: number = (this.configuration ?? {})["max_select"] ?? choice_codes.length
+                    // if (qa.values.length > max_select) {
+                    //     this.error_msg = "More options selected than allowed"
+                    //     return false
+                    // }
+
+                    /*
+                    exclusive_choice = next((x for x in question["choices"] if x.get("exclusive")), None)
+                    if exclusive_choice:
+                        exclusive_choice_id = exclusive_choice["choice_id"]
+                        assert answer == [exclusive_choice_id] or \
+                               exclusive_choice_id not in answer, "Invalid exclusive selection"
+                     */
+
+                    answer.error_msg = ""
+                    break
+
+                default:
+                    throw new Error("Incorrect Question Type provided");
+            }
+
+            state[question.question_id] = question;
+        },
 
         // removeAnswer(val: string): null {
         //     switch (this.getType()) {
@@ -79,120 +156,6 @@ const answerSlice = createSlice({
         //
         //     this.validate()
         // }
-
-
-        // validate(): boolean {
-        //     /*
-        //     If the question is MC, validate:
-        //     - validate selector SA vs MA (1 selected vs >1 selected)
-        //     - the answers match actual codes in the choices
-        //     - validate configuration.max_select
-        //     - validate choices.exclusive
-        //
-        //     If the question is TE, validate that:
-        //         - configuration.max_length
-        //         - validation.patterns
-        //     */
-        //
-        //     if (this._answer == null) {
-        //         this.error_msg = "An answer is required"
-        //         return false
-        //     }
-        //
-        //     let qa: ProfilingAnswer = this._answer;
-        //
-        //     switch (this.getType()) {
-        //         case "TE":
-        //             if (qa.values.length == 0) {
-        //                 this.error_msg = "An answer is required"
-        //                 return false
-        //             }
-        //
-        //             if (qa.values.length > 1) {
-        //                 this.error_msg = "Only one answer allowed"
-        //                 return false
-        //             }
-        //
-        //             let answer: string = qa.values[0]
-        //
-        //             if (answer.length <= 0) {
-        //                 this.error_msg = "Must provide answer"
-        //                 return false
-        //             }
-        //
-        //             const max_length: number = (this.configuration ?? {})["max_length"] ?? 100000
-        //
-        //             if (answer.length > max_length) {
-        //                 this.error_msg = "Answer longer than allowed"
-        //                 return false
-        //             }
-        //
-        //             const patterns: PatternType[] = (this.validation ?? {})["patterns"] ?? []
-        //
-        //             patterns.forEach((pattern) => {
-        //                 let re = new RegExp(pattern["pattern"])
-        //                 if (answer.search(re) == -1) {
-        //                     this.error_msg = pattern["message"]
-        //                     return false
-        //                 }
-        //             })
-        //
-        //             this.error_msg = ""
-        //             return true
-        //
-        //         case "MC":
-        //             // if (qa.values.length == 0) {
-        //             //     this.error_msg = "MC question with no selected answers"
-        //             //     return false
-        //             // }
-        //             //
-        //             // const choice_codes = map(this.getChoices().toJSON(), "choice_id")
-        //             //
-        //             // switch (this.getSelector()) {
-        //             //     case "SA":
-        //             //         if (qa.values.length > 1) {
-        //             //             this.error_msg = "Single Answer MC question with >1 selected answers"
-        //             //             return false
-        //             //         }
-        //             //         break
-        //             //     case "MA":
-        //             //         if (qa.values.length > choice_codes.length) {
-        //             //             this.error_msg = "More options selected than allowed"
-        //             //             return false
-        //             //         }
-        //             //         break
-        //             // }
-        //             //
-        //             // if (!every(qa.values, (v) => {
-        //             //     return includes(choice_codes, v["value"])
-        //             // })) {
-        //             //     this.error_msg = "Invalid Options Selected"
-        //             //     return false
-        //             // }
-        //             //
-        //             // const max_select: number = (this.configuration ?? {})["max_select"] ?? choice_codes.length
-        //             // if (qa.values.length > max_select) {
-        //             //     this.error_msg = "More options selected than allowed"
-        //             //     return false
-        //             // }
-        //
-        //             /*
-        //             exclusive_choice = next((x for x in question["choices"] if x.get("exclusive")), None)
-        //             if exclusive_choice:
-        //                 exclusive_choice_id = exclusive_choice["choice_id"]
-        //                 assert answer == [exclusive_choice_id] or \
-        //                        exclusive_choice_id not in answer, "Invalid exclusive selection"
-        //              */
-        //
-        //             this.error_msg = ""
-        //             return true
-        //
-        //         default:
-        //             throw new Error("Incorrect Question Type provided");
-        //     }
-        //
-        // }
-
 
 
         // save() {
@@ -234,7 +197,7 @@ const answerSlice = createSlice({
 })
 
 // Export the generated reducer function
-export const {setAnswer, setQuestions, questionAdded, questionUpdated} = answerSlice.actions;
+export const {addAnswer, setAnswer, setQuestions, questionAdded, questionUpdated} = answerSlice.actions;
 export default answerSlice.reducer
 
 export const selectAnswerCount = (state: RootState) => state.answers.size
