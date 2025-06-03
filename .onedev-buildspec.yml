@@ -1,4 +1,4 @@
-version: 38
+version: 40
 jobs:
 - name: Push to Github
   steps:
@@ -7,7 +7,11 @@ jobs:
     remoteUrl: https://github.com/GRL/panel-ui
     passwordSecret: github-panel-ui
     force: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
+  triggers:
+  - !BranchUpdateTrigger
+    branches: master
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
