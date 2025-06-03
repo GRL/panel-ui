@@ -3,12 +3,20 @@ import {configureStore} from '@reduxjs/toolkit'
 import bucketReducers from "@/models/bucketSlice.ts"
 import questionReducers from "@/models/questionSlice.ts"
 import appReducers from "@/models/appSlice.ts"
+import answerReducers from "@/models/answerSlice.ts"
 
 export const store = configureStore({
     reducer: {
         app: appReducers,
+
+        // - Read Only
+        // -- These act as API cache stores to allow background loading
         buckets: bucketReducers,
-        questions: questionReducers
+        questions: questionReducers,
+
+        // - Read Write
+        // -- This stores user engagement (eg: answering any questions)
+        answers: answerReducers
     }
 })
 

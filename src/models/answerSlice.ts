@@ -1,13 +1,8 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit'
-// import type {RootState} from '@/store'
+import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit'
 // import {Answer} from "@/models/answer.ts";
 // import {stringify} from "querystring";
-// import {PatternType} from "@/types.ts";
-// import {UserQuestionAnswerIn} from "@/api"
 import {RootState} from '@/store'; // your root state type
 import {PatternValidation, UpkQuestion} from "@/api";
-import {Answer} from "@/models/answer.ts"
-
 
 interface Answer {
     values: string[];
@@ -52,29 +47,26 @@ const answerSlice = createSlice({
             */
 
             switch (question.question_type) {
-                case "MC":
-                    answer.values.push(val);
-                    break
-            }
-
-            switch (question.question_type) {
                 case "TE":
                     answer.values = [val]
 
                     if (answer.values.length > 1) {
                         answer.error_msg = "Only one answer allowed"
+                        break;
                     }
 
                     let answer_text: string = answer.values[0]
 
                     if (answer_text.length <= 0) {
                         answer.error_msg = "Must provide answer"
+                        break;
                     }
 
                     const max_length: number = (question.configuration ?? {})["max_length"] ?? 100000
 
                     if (answer_text.length > max_length) {
                         answer.error_msg = "Answer longer than allowed"
+                        break;
                     }
 
                     const patterns: PatternValidation[] = (question.validation ?? {})["patterns"] ?? []
@@ -82,13 +74,30 @@ const answerSlice = createSlice({
                         let re = new RegExp(pv.pattern)
                         if (answer_text.search(re) == -1) {
                             answer.error_msg = pv.message
+                            return;
                         }
                     })
 
                     answer.error_msg = ""
-                    break
+                    break;
 
                 case "MC":
+                    switch (question.selector) {
+                        case "SA": // Single Answer
+                            answer.values = [val]
+                            break
+                        case "MA": /// Multi Answer
+                            if (answer.values.includes(val)) {
+                                // The item has already been selected
+                                answer.values = answer.values.filter(value => value !== val);
+                            } else {
+                                // It's a new selection
+                                answer.values.push(val);
+                            }
+                            break
+                    }
+
+
                     if (answer.values.length == 0) {
                         answer.error_msg = "MC question with no selected answers"
                     }
@@ -100,26 +109,23 @@ const answerSlice = createSlice({
                             if (answer.values.length > 1) {
                                 answer.error_msg = "Single Answer MC question with >1 selected answers"
                             }
-                            break
+                            break;
                         case "MA":
                             if (answer.values.length > choice_codes.length) {
                                 answer.error_msg = "More options selected than allowed"
                             }
-                            break
+                            break;
                     }
 
-                    // if (!every(qa.values, (v) => {
-                    //     return includes(choice_codes, v["value"])
-                    // })) {
-                    //     this.error_msg = "Invalid Options Selected"
-                    //     return false
-                    // }
-                    //
-                    // const max_select: number = (this.configuration ?? {})["max_select"] ?? choice_codes.length
-                    // if (qa.values.length > max_select) {
-                    //     this.error_msg = "More options selected than allowed"
-                    //     return false
-                    // }
+
+                    if (!answer.values.every(val => choice_codes.includes(val))) {
+                        answer.error_msg = "Invalid Options Selected";
+                    }
+
+                    const max_select: number = (question.configuration ?? {})["max_select"] ?? choice_codes.length
+                    if (answer.values.length > max_select) {
+                        answer.error_msg = "More options selected than allowed"
+                    }
 
                     /*
                     exclusive_choice = next((x for x in question["choices"] if x.get("exclusive")), None)
@@ -130,18 +136,17 @@ const answerSlice = createSlice({
                      */
 
                     answer.error_msg = ""
-                    break
+                    break;
 
                 default:
                     throw new Error("Incorrect Question Type provided");
             }
 
-            state[question.question_id] = question;
+            state[question.question_id] = answer
         },
 
         // removeAnswer(val: string): null {
         //     switch (this.getType()) {
-        //
         //         // You can only remove a value from a MultiChoice
         //         case "MC":
         //             // TODO: implement this
@@ -149,14 +154,11 @@ const answerSlice = createSlice({
         //             // current_values.push(val)
         //             // this._answer = new ProfilingAnswer(this.questionId, current_values);
         //             break
-        //
         //         default:
         //             throw new Error("Incorrect Question Type provided");
         //     }
-        //
         //     this.validate()
         // }
-
 
         // save() {
         //     let question: ProfilingQuestion = this;
@@ -196,9 +198,21 @@ const answerSlice = createSlice({
     }
 })
 
-// Export the generated reducer function
 export const {addAnswer, setAnswer, setQuestions, questionAdded, questionUpdated} = answerSlice.actions;
 export default answerSlice.reducer
 
-export const selectAnswerCount = (state: RootState) => state.answers.size
-// export const selectAnswerByQuestionId = (state: RootState, questionId: string) => state.answers.find(a => q.questionId === questionId)
+
+export const makeSelectChoicesByQuestion = (question: UpkQuestion) =>
+    createSelector(
+        (state: RootState) => state.answers,
+        (answers) => {
+            // const question = questions.find(q => q.id === questionId);
+            // return question?.choices ?? [];
+            return answers[question.question_id] ?? {
+                values: [],
+                error_msg: "",
+                complete: false,
+                processing: false
+            } as Answer;
+        }
+    );

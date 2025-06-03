@@ -19,7 +19,7 @@ export function NavMain() {
             <SidebarGroupContent className="flex flex-col gap-2">
                 <SidebarMenu>
 
-                    <SidebarMenuItem key="Surveys"
+                    <SidebarMenuItem key="surveys"
                                      onClick={() => dispatch(setPage("offerwall"))}
                     >
                         <SidebarMenuButton tooltip="Surveys">
@@ -29,7 +29,7 @@ export function NavMain() {
                     </SidebarMenuItem>
 
 
-                    <SidebarMenuItem key="Questions"
+                    <SidebarMenuItem key="questions"
                                      onClick={() => dispatch(setPage("questions"))}
                     >
                         <SidebarMenuButton tooltip="Questions">
@@ -38,7 +38,7 @@ export function NavMain() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
-                    <SidebarMenuItem key="Community">
+                    <SidebarMenuItem key="community">
                         <SidebarMenuButton tooltip="Community">
                             <Users/>
                             <span>Community</span>
