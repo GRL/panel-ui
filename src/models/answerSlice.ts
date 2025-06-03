@@ -4,7 +4,7 @@ import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {RootState} from '@/store'; // your root state type
 import {PatternValidation, UpkQuestion} from "@/api";
 
-interface Answer {
+export interface Answer {
     values: string[];
     error_msg: string;
 
@@ -23,8 +23,17 @@ const answerSlice = createSlice({
     name: 'answers',
     initialState,
     reducers: {
-
         addAnswer(state, action: PayloadAction<{ question: UpkQuestion, val: string }>) {
+            /* If the question is MC, validate:
+                - validate selector SA vs MA (1 selected vs >1 selected)
+                - the answers match actual codes in the choices
+                - validate configuration.max_select
+                - validate choices.exclusive
+
+                If the question is TE, validate that:
+                    - configuration.max_length
+                    - validation.patterns
+            */
             let question: UpkQuestion = action.payload.question;
             let val: string = action.payload.val.trim();
             let answer: Answer = state[question.question_id] ?? {
@@ -34,17 +43,7 @@ const answerSlice = createSlice({
                 processing: false
             } as Answer;
 
-            /*
-            If the question is MC, validate:
-            - validate selector SA vs MA (1 selected vs >1 selected)
-            - the answers match actual codes in the choices
-            - validate configuration.max_select
-            - validate choices.exclusive
-
-            If the question is TE, validate that:
-                - configuration.max_length
-                - validation.patterns
-            */
+            answer.error_msg = ""  // Reset any error messages
 
             switch (question.question_type) {
                 case "TE":
@@ -78,25 +77,21 @@ const answerSlice = createSlice({
                         }
                     })
 
-                    answer.error_msg = ""
                     break;
 
                 case "MC":
-                    switch (question.selector) {
-                        case "SA": // Single Answer
-                            answer.values = [val]
-                            break
-                        case "MA": /// Multi Answer
-                            if (answer.values.includes(val)) {
-                                // The item has already been selected
-                                answer.values = answer.values.filter(value => value !== val);
-                            } else {
-                                // It's a new selection
-                                answer.values.push(val);
-                            }
-                            break
-                    }
+                    if (answer.values.includes(val)) {
+                        // The item has already been selected
+                        answer.values = answer.values.filter(value => value !== val);
 
+                    } else {
+                        // It's a new selection
+                        if (question.selector == "SA") {
+                            answer.values = [val]
+                        } else if (question.selector == "MA") {
+                            answer.values.push(val);
+                        }
+                    }
 
                     if (answer.values.length == 0) {
                         answer.error_msg = "MC question with no selected answers"
@@ -145,62 +140,29 @@ const answerSlice = createSlice({
             state[question.question_id] = answer
         },
 
-        // removeAnswer(val: string): null {
-        //     switch (this.getType()) {
-        //         // You can only remove a value from a MultiChoice
-        //         case "MC":
-        //             // TODO: implement this
-        //             // let current_values: string[] = this._answer?.values
-        //             // current_values.push(val)
-        //             // this._answer = new ProfilingAnswer(this.questionId, current_values);
-        //             break
-        //         default:
-        //             throw new Error("Incorrect Question Type provided");
-        //     }
-        //     this.validate()
-        // }
+        saveAnswer(state, action: PayloadAction<{ question: UpkQuestion }>) {
+            let question: UpkQuestion = action.payload.question;
+            let answer: Answer = state[question.question_id]
 
-        // save() {
-        //     let question: ProfilingQuestion = this;
-        //     // @ts-ignore
-        //     let answer: ProfilingAnswer = question._answer;
-        //
-        //     if (this._complete || this._processing) {
-        //         return
-        //     }
-        //     this._processing = true
-        //
-        //     let res = JSON.stringify({
-        //         "answers": [{
-        //             "question_id": answer.get('question_id'),
-        //             "answer": map(answer.get("values"), "value")
-        //         }]
-        //     });
-        //
-        //     $.ajax({
-        //         url: ["https://fsb.generalresearch.com", questions.BPID, "profiling-questions", ""].join("/") + "?" + stringify({"bpuid": questions.BPUID}),
-        //         xhrFields: {withCredentials: false},
-        //         processData: false,
-        //         type: "POST",
-        //         contentType: "application/json; charset=utf-8",
-        //         data: res,
-        //         success: function (data) {
-        //             channel.trigger("ProfilingQuestions:start");
-        //         },
-        //         error: function (data) {
-        //             channel.trigger("ProfilingQuestions:start");
-        //             Sentry.captureMessage("Profiling Question submission failed.");
-        //         }
-        //     });
-        // }
-
-
+            state[question.question_id] = {
+                'values': answer.values,
+                'error_msg': "",
+                'processing': false,
+                'complete': false
+            } as Answer
+        }
     }
 })
 
-export const {addAnswer, setAnswer, setQuestions, questionAdded, questionUpdated} = answerSlice.actions;
+export const {addAnswer, saveAnswer} = answerSlice.actions;
 export default answerSlice.reducer
 
+export const answerForQuestion = (state: RootState, question: UpkQuestion) => state.answers[question.question_id] ?? {
+    values: [],
+    error_msg: "",
+    complete: false,
+    processing: false
+} as Answer;
 
 export const makeSelectChoicesByQuestion = (question: UpkQuestion) =>
     createSelector(
