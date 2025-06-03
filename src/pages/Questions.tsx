@@ -1,9 +1,8 @@
 import React, {useMemo, useState} from 'react'
 import {UpkQuestion, UpkQuestionChoice} from "@/api";
-import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
+import {Card, CardContent, CardTitle, CardFooter, CardHeader} from "@/components/ui/card.tsx";
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
 import {addAnswer, makeSelectChoicesByQuestion} from "@/models/answerSlice.ts";
-import {selectQuestionById} from "@/models/questionSlice.ts";
 import {useSelector} from "react-redux";
 import {Button} from "@/components/ui/button"
 import {
@@ -13,6 +12,8 @@ import {
     PaginationLink,
     PaginationNext,
 } from "@/components/ui/pagination"
+import { Input } from "@/components/ui/input"
+import {Badge} from "@/components/ui/badge"
 
 const TextEntry: React.FC<{ question: UpkQuestion }> = ({question}) => {
     const dispatch = useAppDispatch()
@@ -23,24 +24,16 @@ const TextEntry: React.FC<{ question: UpkQuestion }> = ({question}) => {
         dispatch(addAnswer({question: question, val: event.target.value}))
     };
 
-    console.log("TextEntry.answer", answer)
+    // console.log("TextEntry.answer", answer)
 
     return (
-        <Card className="@container/card">
-            <CardHeader>
-                {question.question_text}
-            </CardHeader>
-
-            <CardContent>
-                <input type="text"
-                       id="text-entry-input"
-                       aria-describedby=""
-                       placeholder=""
-                       onKeyDown={handleInputChange}
-                />
-                <small id="text-entry-msg">{answer.error_msg}</small>
-            </CardContent>
-        </Card>
+        <Input type="text"
+               id="text-entry-input"
+               aria-describedby=""
+               placeholder=""
+               onKeyDown={handleInputChange}
+        />
+        // <small id="text-entry-msg">{answer.error_msg}</small>
     )
 }
 
@@ -48,67 +41,83 @@ const MultiChoiceItem: React.FC<{ question: UpkQuestion, choice: UpkQuestionChoi
     const dispatch = useAppDispatch()
     const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
     const answer = useSelector(selectAnswer);
-    const selected = answer.values.includes(choice.choice_id)
+    const selected: Boolean = answer.values.includes(choice.choice_id)
 
     return (
-        <Button
-            onClick={() => dispatch(addAnswer({question: question, val: choice.choice_id}))}
-            variant={selected ? "default" : "secondary"}
-        >
-            {choice.choice_text}
-        </Button>
+        <li key={choice.choice_id} style={{marginBottom: '0.5rem'}}>
+            <Button
+                onClick={() => dispatch(addAnswer({question: question, val: choice.choice_id}))}
+                variant={selected ? "default" : "secondary"}
+            >
+                {choice.choice_text}
+            </Button>
+        </li>
     )
 }
 
 const MultipleChoice: React.FC<{ question: UpkQuestion }> = ({question}) => {
-    const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
-    const answer = useSelector(selectAnswer);
+    // const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
+    // const answer = useSelector(selectAnswer);
 
     return (
-        <Card>
-            <CardHeader>
-                {question.question_text}
-                <small id="text-entry-msg">{answer.error_msg}</small>
-            </CardHeader>
-
-            <CardContent>
-                <ol>
-                    {
-                        question.choices.map(c => {
-                            return <MultiChoiceItem
-                                key={`${question.question_id}-${c.choice_id}`}
-                                question={question}
-                                choice={c}/>
-                        })
-                    }
-                </ol>
-            </CardContent>
-        </Card>
+        // <small id="text-entry-msg">{answer.error_msg}</small>
+        <ol style={{listStyle: 'none', padding: 0, margin: 0}}>
+            {
+                question.choices.map(c => {
+                    return <MultiChoiceItem
+                        key={`${question.question_id}-${c.choice_id}`}
+                        question={question}
+                        choice={c}/>
+                })
+            }
+        </ol>
     )
 }
 
 
 const ProfileQuestionFull: React.FC<UpkQuestion> = ({question}) => {
-    switch (question.question_type) {
-        case "TE":
-            return <TextEntry question={question}/>
 
-        case "MC":
-            return <MultipleChoice question={question}/>
 
-        default:
-            throw new Error("Incorrect Question Type provided");
-    }
+    const renderContent = () => {
+        switch (question.question_type) {
+            case 'TE':
+                return <TextEntry question={question}/>
+            case 'MC':
+                return <MultipleChoice question={question}/>
+        }
+    };
+
+    return (
+        <Card className="@container/card relative">
+            <Badge
+                className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums"
+                variant="outline"
+                title={`Currently ${question.task_count.toLocaleString()} surveys use this profiling question`}
+            >
+                {question.task_count.toLocaleString()}
+            </Badge>
+
+            <CardHeader>
+                <CardTitle>{question.question_text}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {renderContent()}
+            </CardContent>
+            <CardFooter className="flex-col gap-2">
+                <Button type="submit" className="w-full">
+                    Submit
+                </Button>
+            </CardFooter>
+        </Card>
+    )
 }
 
 const QuestionsPage = () => {
     const questions = useAppSelector(state => state.questions)
     const [activeQuestionID, setQuestionID] = useState(() => questions[0].question_id);
 
-    const selectQuestion = useMemo(() => selectQuestionById(activeQuestionID), [questions]);
-    const question = useSelector(selectQuestion);
-
-    console.log(activeQuestionID, questions)
+    const question = questions.find(q => q.question_id === activeQuestionID);
+    console.log("activeQuestionID:", activeQuestionID, question)
 
     return (
         <div>
@@ -116,16 +125,19 @@ const QuestionsPage = () => {
                 A total of {questions.length} questions are available.
             </p>
 
-            <Pagination>
+            <Pagination className="mt-4 mb-4">
                 <PaginationContent>
                     {
-                        questions.map((q, i) => {
+                        questions.slice(0, 5).map((q, i) => {
                             return (
                                 <PaginationItem>
                                     <PaginationLink
+                                        href="#"
+                                        title={q.question_text}
                                         onClick={() => setQuestionID(q.question_id)}
+                                        isActive={q.question_id === activeQuestionID}
                                     >
-                                        {i+1}
+                                        {i + 1}
                                     </PaginationLink>
                                 </PaginationItem>
                             )
@@ -133,7 +145,9 @@ const QuestionsPage = () => {
                     }
 
                     <PaginationItem>
-                        <PaginationNext/>
+                        <PaginationNext
+                            href="#"
+                        />
                     </PaginationItem>
                 </PaginationContent>
             </Pagination>
@@ -141,7 +155,7 @@ const QuestionsPage = () => {
 
             <ProfileQuestionFull key={question.question_id} question={question} className="mt-4 mb-4"/>
         </div>
-    );
+    )
 }
 
 export {
