@@ -1,14 +1,13 @@
-import React, {useMemo, useState} from 'react'
+import React, {useMemo} from 'react'
 import {
     BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost,
     ProfilingQuestionsApiFactory,
-    UpkQuestion,
     UpkQuestionChoice,
     UserQuestionAnswerIn
 } from "@/api";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
-import answerSlice, {addAnswer, Answer,answerForQuestion, makeSelectChoicesByQuestion, saveAnswer} from "@/models/answerSlice.ts";
+import {addAnswer, Answer, makeSelectChoicesByQuestion, saveAnswer, submitAnswer} from "@/models/answerSlice.ts";
 import {useSelector} from "react-redux";
 import {Button} from "@/components/ui/button"
 import {
@@ -20,8 +19,17 @@ import {
 } from "@/components/ui/pagination"
 import {Input} from "@/components/ui/input"
 import {Badge} from "@/components/ui/badge"
+import clsx from "clsx"
+import {
+    ProfileQuestion,
+    selectNextAvailableQuestion,
+    selectQuestions,
+    setNextQuestion,
+    setQuestionActive
+} from "@/models/questionSlice.ts";
+import {assert} from "@/lib/utils.ts";
 
-const TextEntry: React.FC<{ question: UpkQuestion }> = ({question}) => {
+const TextEntry: React.FC<{ question: ProfileQuestion }> = ({question}) => {
     const dispatch = useAppDispatch()
     const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
     const answer: Answer = useSelector(selectAnswer);
@@ -50,7 +58,7 @@ const TextEntry: React.FC<{ question: UpkQuestion }> = ({question}) => {
     )
 }
 
-const MultiChoiceItem: React.FC<{ question: UpkQuestion, choice: UpkQuestionChoice }> = ({question, choice}) => {
+const MultiChoiceItem: React.FC<{ question: ProfileQuestion, choice: UpkQuestionChoice }> = ({question, choice}) => {
     const dispatch = useAppDispatch()
     const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
     const answer: Answer = useSelector(selectAnswer);
@@ -69,7 +77,7 @@ const MultiChoiceItem: React.FC<{ question: UpkQuestion, choice: UpkQuestionChoi
     )
 }
 
-const MultipleChoice: React.FC<{ question: UpkQuestion }> = ({question}) => {
+const MultipleChoice: React.FC<{ question: ProfileQuestion }> = ({question}) => {
     const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
     const answer: Answer = useSelector(selectAnswer);
     const error: Boolean = answer.error_msg.length > 0
@@ -95,8 +103,12 @@ const MultipleChoice: React.FC<{ question: UpkQuestion }> = ({question}) => {
 }
 
 
-const ProfileQuestionFull: React.FC<UpkQuestion> = ({question}) => {
+const ProfileQuestionFull: React.FC<{
+    question: ProfileQuestion,
+}> = ({question}) => {
+
     const dispatch = useAppDispatch()
+
     const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
     const answer: Answer = useSelector(selectAnswer);
     const app = useAppSelector(state => state.app)
@@ -114,14 +126,12 @@ const ProfileQuestionFull: React.FC<UpkQuestion> = ({question}) => {
         }
     };
 
-    const submitAnswer = () => {
-        if (!can_submit) {
-            return;
-        }
+    const submitAnswerEvt = () => {
+        dispatch(submitAnswer({question: question}))
 
-        if (answer.complete || answer.processing) {
-            return
-        }
+        assert(!answer.complete, "Can't submit completed Answer")
+        assert(!answer.processing, "Can't submit processing Answer")
+        assert(answer.error_msg.length == 0, "Can't submit Answer with error message")
 
         let body: BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost = {
             'answers': [{
@@ -130,11 +140,11 @@ const ProfileQuestionFull: React.FC<UpkQuestion> = ({question}) => {
             } as UserQuestionAnswerIn
             ]
         }
-        console.log("submitAnswers", body)
         new ProfilingQuestionsApiFactory().submitProfilingQuestionsProductIdProfilingQuestionsPost(app.bpid, app.bpuid, body)
             .then(res => {
                 if (res.status == 200) {
                     dispatch(saveAnswer({question: question}))
+                    dispatch(setNextQuestion())
                 } else {
                     // let error_msg = res.data.msg
                 }
@@ -163,7 +173,7 @@ const ProfileQuestionFull: React.FC<UpkQuestion> = ({question}) => {
                     type="submit"
                     className="w-1/3 cursor-pointer"
                     disabled={!can_submit}
-                    onClick={submitAnswer}
+                    onClick={submitAnswerEvt}
                 >
                     Submit
                 </Button>
@@ -171,27 +181,38 @@ const ProfileQuestionFull: React.FC<UpkQuestion> = ({question}) => {
         </Card>
     )
 }
-// type Props = {
-//     onSetQuestionID: (name: string) => void
-// }
 
 const PaginationIcon: React.FC<{
-    question: UpkQuestion, activeQuestionID: string, idx: number, onSetQuestionID: () => void
-}> = ({question, activeQuestionID, idx, onSetQuestionID}) => {
+    question: ProfileQuestion, idx: number,
+}> = ({question, idx}) => {
+    const dispatch = useAppDispatch()
 
     const answers = useAppSelector(state => state.answers)
-    const answer = answers[question.question_id]
+    const completed: Boolean = Boolean(answers[question.question_id]?.complete)
+
+    const setQuestion = (evt) => {
+        if (completed) {
+            evt.preventDefault()
+        } else {
+            dispatch(setQuestionActive(question))
+        }
+    }
 
     return (
         <PaginationItem>
             <PaginationLink
                 href="#"
                 title={question.question_text}
-                isActive={question.question_id === activeQuestionID}
-                aria-disabled={answer?.complete}
+                isActive={question.active}
+                aria-disabled={completed}
 
-                onClick={(e) => answer?.complete ? e.preventDefault() : onSetQuestionID(question.question_id)}
-                className={answer?.complete ? "pointer-events-none opacity-50 cursor-not-allowed" : ""}>
+                onClick={setQuestion}
+                className={clsx("cursor-pointer border border-gray-100",
+                    {
+                        "pointer-events-none opacity-50 cursor-not-allowed": completed,
+                        "opacity-100 border-gray-200": question.active,
+                    })}
+            >
                 {idx + 1}
             </PaginationLink>
         </PaginationItem>
@@ -199,10 +220,19 @@ const PaginationIcon: React.FC<{
 }
 
 const QuestionsPage = () => {
-    const questions = useAppSelector(state => state.questions)
+    const dispatch = useAppDispatch()
 
-    const [activeQuestionID, setQuestionID] = useState(() => questions[0].question_id);
-    const question = questions.find(q => q.question_id === activeQuestionID);
+    const questions = useSelector(selectQuestions)
+    const question = useSelector(selectNextAvailableQuestion)
+    dispatch(setQuestionActive(question))
+
+    const clickNext = () => {
+        // TODO: if nextQuestion was already submitted, skip it!
+
+        const index = questions.findIndex(q => q.question_id === question.question_id)
+        const nextQuestion = index !== -1 ? questions[index + 1] ?? null : null
+        dispatch(setQuestionActive(nextQuestion))
+    }
 
     return (
         <div>
@@ -214,20 +244,27 @@ const QuestionsPage = () => {
                 <PaginationContent>
                     {
                         questions.slice(0, 5).map((q, i) => {
-                            return <PaginationIcon key={q.question_id} question={q} idx={i}
-                                                   onSetQuestionID={setQuestionID}/>
+                            return <PaginationIcon
+                                key={q.question_id}
+                                question={q}
+                                idx={i}
+                            />
                         })
                     }
 
                     <PaginationItem>
                         <PaginationNext
+                            onClick={clickNext}
                             href="#"
                         />
                     </PaginationItem>
                 </PaginationContent>
             </Pagination>
 
-            <ProfileQuestionFull key={question.question_id} question={question} className="mt-4 mb-4"/>
+            <ProfileQuestionFull
+                key={question.question_id}
+                question={question}
+                className="mt-4 mb-4"/>
         </div>
     )
 }

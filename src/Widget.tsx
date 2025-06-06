@@ -27,7 +27,7 @@ const Widget = () => {
             })
             .catch(err => console.log(err));
 
-        new ProfilingQuestionsApi().getProfilingQuestionsProductIdProfilingQuestionsGet(app.bpid, app.bpuid, "104.9.125.144")
+        new ProfilingQuestionsApi().getProfilingQuestionsProductIdProfilingQuestionsGet(app.bpid, app.bpuid, "104.9.125.144", undefined, undefined, 1000 )
             .then(res => {
                 dispatch(setQuestions(res.data.questions))
             })

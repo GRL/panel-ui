@@ -13,11 +13,13 @@ const appSlice = createSlice({
             return action.payload;
         },
         setPage(state, action: PayloadAction<Page>) {
-            console.log("setPage.state", state.currentPage, action.payload)
             state.currentPage = action.payload;
         }
     }
 })
 
-export const {setApp, setPage} = appSlice.actions;
+export const {
+    setApp,
+    setPage
+} = appSlice.actions;
 export default appSlice.reducer

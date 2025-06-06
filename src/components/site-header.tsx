@@ -1,8 +1,11 @@
 import {Separator} from "@/components/ui/separator"
 import {SidebarTrigger} from "@/components/ui/sidebar"
 import React from "react";
+import {useAppSelector} from "@/hooks.ts";
+import {Offerwall} from "@/pages/Offerwall.tsx";
 
 const SiteHeader = () => {
+    const app = useAppSelector(state => state.app)
 
     return (
         <header
@@ -14,7 +17,11 @@ const SiteHeader = () => {
                     orientation="vertical"
                     className="mx-2 data-[orientation=vertical]:h-4"
                 />
-                <h1 className="text-base font-medium">Offerwall</h1>
+                <h1 className="text-base font-medium">
+                    {app.currentPage === 'offerwall' && "Offerwall"}
+                    {app.currentPage === 'questions' && "Profiling Questions"}
+                    {app.currentPage === 'cashouts' && "Cashout Methods"}
+                </h1>
 
             </div>
         </header>

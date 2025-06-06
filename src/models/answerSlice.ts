@@ -2,7 +2,9 @@ import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit'
 // import {Answer} from "@/models/answer.ts";
 // import {stringify} from "querystring";
 import {RootState} from '@/store'; // your root state type
-import {PatternValidation, UpkQuestion} from "@/api";
+import {PatternValidation} from "@/api";
+import {assert} from "@/lib/utils.ts"
+import {ProfileQuestion} from "@/models/questionSlice.ts"
 
 export interface Answer {
     values: string[];
@@ -23,7 +25,7 @@ const answerSlice = createSlice({
     name: 'answers',
     initialState,
     reducers: {
-        addAnswer(state, action: PayloadAction<{ question: UpkQuestion, val: string }>) {
+        addAnswer(state, action: PayloadAction<{ question: ProfileQuestion, val: string }>) {
             /* If the question is MC, validate:
                 - validate selector SA vs MA (1 selected vs >1 selected)
                 - the answers match actual codes in the choices
@@ -34,7 +36,7 @@ const answerSlice = createSlice({
                     - configuration.max_length
                     - validation.patterns
             */
-            let question: UpkQuestion = action.payload.question;
+            let question: ProfileQuestion = action.payload.question;
             let val: string = action.payload.val.trim();
             let answer: Answer = state[question.question_id] ?? {
                 values: [],
@@ -140,31 +142,55 @@ const answerSlice = createSlice({
             state[question.question_id] = answer
         },
 
-        saveAnswer(state, action: PayloadAction<{ question: UpkQuestion }>) {
-            let question: UpkQuestion = action.payload.question;
-            let answer: Answer = state[question.question_id]
+        submitAnswer(state, action: PayloadAction<{ question: ProfileQuestion }>) {
+            const question: ProfileQuestion = action.payload.question;
+            const answer: Answer = state[question.question_id]
+
+            assert(!answer.complete, "Can't submit completed Answer")
+            assert(!answer.processing, "Can't submit processing Answer")
+            assert(answer.error_msg.length == 0, "Can't submit Answer with error message")
 
             state[question.question_id] = {
                 'values': answer.values,
-                'error_msg': "",
-                'processing': false,
+                'error_msg': answer.error_msg,
+                'processing': true,
                 'complete': false
+            } as Answer
+        },
+
+        saveAnswer(state, action: PayloadAction<{ question: ProfileQuestion }>) {
+            const question: ProfileQuestion = action.payload.question;
+            const answer: Answer = state[question.question_id]
+
+            assert(!answer.complete, "Can't submit completed Answer")
+            assert(answer.processing, "Answer must be processing")
+            console.assert(answer.error_msg.length == 0, "Can't submit Answer with error message")
+
+            state[question.question_id] = {
+                'values': answer.values,
+                'error_msg': answer.error_msg,
+                'processing': false,
+                'complete': true
             } as Answer
         }
     }
 })
 
-export const {addAnswer, saveAnswer} = answerSlice.actions;
+export const {
+    addAnswer,
+    saveAnswer,
+    submitAnswer
+} = answerSlice.actions;
 export default answerSlice.reducer
 
-export const answerForQuestion = (state: RootState, question: UpkQuestion) => state.answers[question.question_id] ?? {
+export const answerForQuestion = (state: RootState, question: ProfileQuestion) => state.answers[question.question_id] ?? {
     values: [],
     error_msg: "",
     complete: false,
     processing: false
 } as Answer;
 
-export const makeSelectChoicesByQuestion = (question: UpkQuestion) =>
+export const makeSelectChoicesByQuestion = (question: ProfileQuestion) =>
     createSelector(
         (state: RootState) => state.answers,
         (answers) => {
