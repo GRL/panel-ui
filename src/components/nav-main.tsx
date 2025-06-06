@@ -10,9 +10,14 @@ import {
 } from "@/components/ui/sidebar"
 import {setPage} from "@/models/appSlice.ts";
 import {useAppDispatch} from "@/hooks.ts";
+import {useSelector} from "react-redux";
+import {selectQuestions} from "@/models/questionSlice.ts";
+import {Badge} from "@/components/ui/badge"
 
 export function NavMain() {
     const dispatch = useAppDispatch()
+
+    const questions = useSelector(selectQuestions)
 
     return (
         <SidebarGroup>
@@ -34,7 +39,13 @@ export function NavMain() {
                     >
                         <SidebarMenuButton tooltip="Questions">
                             <ListIcon/>
-                            <span>Questions</span>
+                            <span>
+                                Questions <Badge
+                                className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
+                                variant="outline"
+                                title={`${questions.length.toLocaleString()} profiling question available`}
+                            >{questions.length.toLocaleString()}</Badge>
+                            </span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 

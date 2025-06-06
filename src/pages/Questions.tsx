@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {
     BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost,
     ProfilingQuestionsApiFactory,
@@ -7,7 +7,7 @@ import {
 } from "@/api";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
-import {addAnswer, Answer, makeSelectChoicesByQuestion, saveAnswer, submitAnswer} from "@/models/answerSlice.ts";
+import {addAnswer, Answer, saveAnswer, selectAnswerForQuestion, submitAnswer} from "@/models/answerSlice.ts";
 import {useSelector} from "react-redux";
 import {Button} from "@/components/ui/button"
 import {
@@ -22,18 +22,21 @@ import {Badge} from "@/components/ui/badge"
 import clsx from "clsx"
 import {
     ProfileQuestion,
+    selectFirstAvailableQuestion,
     selectNextAvailableQuestion,
     selectQuestions,
     setNextQuestion,
     setQuestionActive
 } from "@/models/questionSlice.ts";
 import {assert} from "@/lib/utils.ts";
+import {motion} from "framer-motion"
 
 const TextEntry: React.FC<{ question: ProfileQuestion }> = ({question}) => {
     const dispatch = useAppDispatch()
-    const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
-    const answer: Answer = useSelector(selectAnswer);
-    const error: Boolean = answer.error_msg.length > 0
+    // const selectAnswer = useMemo(() => selectAnswerForQuestion(question), [question]);
+    // const selectAnswer = useSelector(selectAnswerForQuestion(question));
+    const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
+    const error: Boolean = answer?.error_msg.length > 0
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(addAnswer({question: question, val: event.target.value}))
@@ -44,14 +47,14 @@ const TextEntry: React.FC<{ question: ProfileQuestion }> = ({question}) => {
             <Input type="text"
                    id="text-entry-input"
                    aria-describedby=""
-                   defaultValue={answer.values.length ? answer.values[0] : ""}
+                   defaultValue={answer?.values.length ? answer?.values[0] : ""}
                    onKeyUp={handleInputChange}
-                   title={error ? answer.error_msg : ""}
+                   title={error ? answer?.error_msg : ""}
                    className={error ? "border-red-500 focus-visible:ring-red-500" : ""}
             />
 
             {
-                error && <p className="text-sm text-red-500 mt-1">{answer.error_msg}</p>
+                error && <p className="text-sm text-red-500 mt-1">{answer?.error_msg}</p>
             }
         </>
 
@@ -60,9 +63,11 @@ const TextEntry: React.FC<{ question: ProfileQuestion }> = ({question}) => {
 
 const MultiChoiceItem: React.FC<{ question: ProfileQuestion, choice: UpkQuestionChoice }> = ({question, choice}) => {
     const dispatch = useAppDispatch()
-    const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
-    const answer: Answer = useSelector(selectAnswer);
-    const selected: Boolean = answer.values.includes(choice.choice_id)
+    // const selectAnswer = useMemo(() => selectAnswerForQuestion(question), [question]);
+    // const answer: Answer = useSelector(selectAnswer);
+    const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
+
+    const selected: Boolean = (answer?.values || []).includes(choice.choice_id)
 
     return (
         <li key={choice.choice_id} style={{marginBottom: '0.5rem'}}>
@@ -78,14 +83,16 @@ const MultiChoiceItem: React.FC<{ question: ProfileQuestion, choice: UpkQuestion
 }
 
 const MultipleChoice: React.FC<{ question: ProfileQuestion }> = ({question}) => {
-    const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
-    const answer: Answer = useSelector(selectAnswer);
-    const error: Boolean = answer.error_msg.length > 0
+    // const selectAnswer = useMemo(() => selectAnswerForQuestion(question), [question]);
+    // const answer: Answer = useSelector(selectAnswer);
+
+    const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
+    const error: Boolean = answer?.error_msg.length > 0
 
     return (
         <>
             {
-                error && <p className="text-sm text-red-500 mt-1">{answer.error_msg}</p>
+                error && <p className="text-sm text-red-500 mt-1">{answer?.error_msg}</p>
             }
 
             <ol style={{listStyle: 'none', padding: 0, margin: 0}}>
@@ -109,13 +116,14 @@ const ProfileQuestionFull: React.FC<{
 
     const dispatch = useAppDispatch()
 
-    const selectAnswer = useMemo(() => makeSelectChoicesByQuestion(question), [question]);
-    const answer: Answer = useSelector(selectAnswer);
+    // const selectAnswer = useMemo(() => selectAnswerForQuestion(question), [question]);
+    // const answer: Answer = useSelector(selectAnswer);
+    const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
     const app = useAppSelector(state => state.app)
 
-    const provided_answer = answer.values.length > 0
-    const error: Boolean = answer.error_msg.length > 0
-    const can_submit = provided_answer && !error && !answer.complete
+    const provided_answer = answer?.values.length > 0
+    const error: Boolean = answer?.error_msg.length > 0
+    const can_submit = provided_answer && !error && !answer?.complete
 
     const renderContent = () => {
         switch (question.question_type) {
@@ -129,9 +137,9 @@ const ProfileQuestionFull: React.FC<{
     const submitAnswerEvt = () => {
         dispatch(submitAnswer({question: question}))
 
-        assert(!answer.complete, "Can't submit completed Answer")
-        assert(!answer.processing, "Can't submit processing Answer")
-        assert(answer.error_msg.length == 0, "Can't submit Answer with error message")
+        assert(!answer?.complete, "Can't submit completed Answer")
+        assert(!answer?.processing, "Can't submit processing Answer")
+        assert(answer?.error_msg.length == 0, "Can't submit Answer with error message")
 
         let body: BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost = {
             'answers': [{
@@ -153,7 +161,17 @@ const ProfileQuestionFull: React.FC<{
     }
 
     return (
-        <Card className="@container/card relative">
+        <Card className="@container/card relative overflow-hidden">
+            {answer && answer.processing && (
+                <motion.div
+                    className="absolute top-0 left-0 h-0.5 bg-gray-300"
+                    initial={{width: "0%"}}
+                    animate={{width: "100%"}}
+                    transition={{duration: 1, ease: "easeInOut"}}
+                    // onAnimationComplete={() => setLoading(false)}
+                />
+            )}
+
             <Badge
                 className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
                 variant="outline"
@@ -219,35 +237,64 @@ const PaginationIcon: React.FC<{
     )
 }
 
+
 const QuestionsPage = () => {
     const dispatch = useAppDispatch()
 
     const questions = useSelector(selectQuestions)
-    const question = useSelector(selectNextAvailableQuestion)
-    dispatch(setQuestionActive(question))
+    const question = useSelector(selectFirstAvailableQuestion)
+    dispatch(setQuestionActive(question as ProfileQuestion))
+
+    // This is saved now, so that if they click next it's ready. It
+    // cannot be done within the click handler.
+    const nextQuestion = useSelector(selectNextAvailableQuestion)
 
     const clickNext = () => {
         // TODO: if nextQuestion was already submitted, skip it!
+        if (nextQuestion) {
+            // TS is not smart enough to know that the if statement above
+            // prevents this from ever being null
+            dispatch(setQuestionActive(nextQuestion as ProfileQuestion))
+        } else {
+            // What do we do now... no more questions left to do.
+        }
+    }
 
-        const index = questions.findIndex(q => q.question_id === question.question_id)
-        const nextQuestion = index !== -1 ? questions[index + 1] ?? null : null
-        dispatch(setQuestionActive(nextQuestion))
+    // All the variables needed for a sliding window
+    const q_idx = questions.findIndex(q => q.question_id === question.question_id)
+    const questionsWindow = (
+        items: ProfileQuestion[], currentIndex: number, windowSize: number = 7
+    ): ProfileQuestion[] => {
+        const half: number = Math.floor(windowSize / 2)
+        const total: number = items.length
+        let start: number = currentIndex - half
+        let end: number = currentIndex + half + 1
+
+        if (start < 0) {
+            end += Math.abs(start)
+            start = 0
+        }
+
+        // Adjust if window goes past the end
+        if (end > total) {
+            const overflow: number = end - total
+            start = Math.max(0, start - overflow)
+            end = total
+        }
+
+        return items.slice(start, end)
     }
 
     return (
-        <div>
-            <p>
-                A total of {questions.length} questions are available.
-            </p>
-
+        <>
             <Pagination className="mt-4 mb-4">
                 <PaginationContent>
                     {
-                        questions.slice(0, 5).map((q, i) => {
+                        questionsWindow(questions, q_idx).map(q => {
                             return <PaginationIcon
                                 key={q.question_id}
                                 question={q}
-                                idx={i}
+                                idx={questions.findIndex(qq => qq.question_id === q.question_id)}
                             />
                         })
                     }
@@ -265,7 +312,7 @@ const QuestionsPage = () => {
                 key={question.question_id}
                 question={question}
                 className="mt-4 mb-4"/>
-        </div>
+        </>
     )
 }
 

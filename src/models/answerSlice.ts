@@ -1,4 +1,6 @@
 import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit'
+import {Selector} from 'react-redux'
+
 // import {Answer} from "@/models/answer.ts";
 // import {stringify} from "querystring";
 import {RootState} from '@/store'; // your root state type
@@ -183,24 +185,13 @@ export const {
 } = answerSlice.actions;
 export default answerSlice.reducer
 
-export const answerForQuestion = (state: RootState, question: ProfileQuestion) => state.answers[question.question_id] ?? {
-    values: [],
-    error_msg: "",
-    complete: false,
-    processing: false
-} as Answer;
 
-export const makeSelectChoicesByQuestion = (question: ProfileQuestion) =>
+export const selectAnswerForQuestion = (
+    question: ProfileQuestion
+): Selector<RootState, Answer | null> =>
     createSelector(
         (state: RootState) => state.answers,
         (answers) => {
-            // const question = questions.find(q => q.id === questionId);
-            // return question?.choices ?? [];
-            return answers[question.question_id] ?? {
-                values: [],
-                error_msg: "",
-                complete: false,
-                processing: false
-            } as Answer;
+            return answers[question.question_id] || null
         }
     );
