@@ -42,11 +42,11 @@ import {setApp} from "@/models/appSlice.ts";
 
     const root = createRoot(container)
     root.render(
-        <React.StrictMode>
+        // <React.StrictMode>
             <Provider store={store}>
                 <Widget/>
             </Provider>
-        </React.StrictMode>
+        // </React.StrictMode>
     );
 
 })()

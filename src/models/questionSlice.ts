@@ -58,6 +58,12 @@ export default questionSlice.reducer
 // We need to fetch the next available Question that either doesn't have an Answer, or the Answer
 // isn't Answer.completed
 export const selectQuestions = (state: RootState) => state.questions
+export const makeSelectQuestionsByIds = (ids: string[]) =>
+    createSelector(
+        (state: RootState) => state.questions,
+        (questions: ProfileQuestion[]) => questions.filter(q => ids.includes(q.question_id))
+    )
+
 export const selectActiveQuestion = (state: RootState) => state.questions.find(i => i.active)
 export const selectAnswers = (state: RootState) => state.answers
 

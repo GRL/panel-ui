@@ -110,9 +110,9 @@ const MultipleChoice: React.FC<{ question: ProfileQuestion }> = ({question}) => 
 }
 
 
-const ProfileQuestionFull: React.FC<{
-    question: ProfileQuestion,
-}> = ({question}) => {
+export const ProfileQuestionFull: React.FC<{
+    question: ProfileQuestion, submitAnswerEvt: () => void
+}> = ({question, submitAnswerEvt}) => {
 
     const dispatch = useAppDispatch()
 
@@ -134,31 +134,6 @@ const ProfileQuestionFull: React.FC<{
         }
     };
 
-    const submitAnswerEvt = () => {
-        dispatch(submitAnswer({question: question}))
-
-        assert(!answer?.complete, "Can't submit completed Answer")
-        assert(!answer?.processing, "Can't submit processing Answer")
-        assert(answer?.error_msg.length == 0, "Can't submit Answer with error message")
-
-        let body: BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost = {
-            'answers': [{
-                "question_id": question.question_id,
-                "answer": answer.values
-            } as UserQuestionAnswerIn
-            ]
-        }
-        new ProfilingQuestionsApiFactory().submitProfilingQuestionsProductIdProfilingQuestionsPost(app.bpid, app.bpuid, body)
-            .then(res => {
-                if (res.status == 200) {
-                    dispatch(saveAnswer({question: question}))
-                    dispatch(setNextQuestion())
-                } else {
-                    // let error_msg = res.data.msg
-                }
-            })
-            .catch(err => console.log(err));
-    }
 
     return (
         <Card className="@container/card relative overflow-hidden">
@@ -175,9 +150,9 @@ const ProfileQuestionFull: React.FC<{
             <Badge
                 className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
                 variant="outline"
-                title={`Currently ${question.task_count.toLocaleString()} surveys use this profiling question`}
+                title={`Currently ${(question.task_count ?? 0).toLocaleString()} surveys use this profiling question`}
             >
-                {question.task_count.toLocaleString()}
+                {(question.task_count ?? 0).toLocaleString()}
             </Badge>
 
             <CardHeader>
@@ -249,6 +224,9 @@ const QuestionsPage = () => {
     // cannot be done within the click handler.
     const nextQuestion = useSelector(selectNextAvailableQuestion)
 
+    const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
+    const app = useAppSelector(state => state.app)
+
     const clickNext = () => {
         // TODO: if nextQuestion was already submitted, skip it!
         if (nextQuestion) {
@@ -285,6 +263,34 @@ const QuestionsPage = () => {
         return items.slice(start, end)
     }
 
+
+    const submitAnswerEvt = () => {
+        dispatch(submitAnswer({question: question}))
+
+        assert(!answer?.complete, "Can't submit completed Answer")
+        assert(!answer?.processing, "Can't submit processing Answer")
+        assert(answer?.error_msg.length == 0, "Can't submit Answer with error message")
+
+        let body: BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost = {
+            'answers': [{
+                "question_id": question.question_id,
+                "answer": answer.values
+            } as UserQuestionAnswerIn
+            ]
+        }
+        new ProfilingQuestionsApiFactory().submitProfilingQuestionsProductIdProfilingQuestionsPost(app.bpid, app.bpuid, body)
+            .then(res => {
+                if (res.status == 200) {
+                    dispatch(saveAnswer({question: question}))
+                    dispatch(setNextQuestion())
+                } else {
+                    // let error_msg = res.data.msg
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
+
     return (
         <>
             <Pagination className="mt-4 mb-4">
@@ -311,6 +317,7 @@ const QuestionsPage = () => {
             <ProfileQuestionFull
                 key={question.question_id}
                 question={question}
+                submitAnswerEvt={submitAnswerEvt}
                 className="mt-4 mb-4"/>
         </>
     )

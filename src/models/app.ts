@@ -10,4 +10,8 @@ export interface App {
     leaderboard: boolean;
 
     currentPage: Page
+
+    //-- responses saved from the last OfferwallResponse
+    availability_count: number | undefined;
+    offerwall_id: string | undefined;
 }

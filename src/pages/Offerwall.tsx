@@ -1,12 +1,25 @@
 import React from 'react'
 import {Separator} from "@/components/ui/separator"
 import {Link} from '@mui/material';
+import {useSelector} from "react-redux";
 
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
+import {makeSelectQuestionsByIds, setNextQuestion, setQuestions} from "@/models/questionSlice.ts"
 import {CheckIcon, MessageCircleQuestionIcon, XIcon} from "lucide-react"
-import {SoftPairBucket} from "@/api/models/soft-pair-bucket.ts"
-import {useAppSelector} from '@/hooks'
+import {
+    BodyOfferwallSoftpairPostProductIdOfferwall37d1da64OfferwallIdPost,
+    OfferwallApi,
+    SoftPairBucket,
+    UserQuestionAnswerIn
+} from "@/api"
+import {useAppDispatch, useAppSelector} from '@/hooks'
+import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet"
+import {ProfileQuestionFull} from "@/pages/Questions.tsx"
+import {Answer, saveAnswer, selectAnswerForQuestion, submitAnswer} from "@/models/answerSlice.ts";
+import {assert} from "@/lib/utils.ts";
+import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts";
+import {setBuckets} from "@/models/bucketSlice.ts";
 
 const BucketStatus: React.FC<SoftPairBucket> = ({bucket}) => {
     switch (bucket.eligibility) {
@@ -19,6 +32,74 @@ const BucketStatus: React.FC<SoftPairBucket> = ({bucket}) => {
     }
 }
 
+const ConditionalQuestions: React.FC<SoftPairBucket> = ({bucket}) => {
+    const dispatch = useAppDispatch()
+
+    const questions = useSelector(makeSelectQuestionsByIds(bucket.missing_questions))
+    const question = questions[0]
+    const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
+    const app = useAppSelector(state => state.app)
+
+    console.log("Conditional bucket:", questions, question, answer)
+
+    const submitEvt = () => {
+        dispatch(submitAnswer({question: question}))
+
+        assert(!answer?.complete, "Can't submit completed Answer")
+        assert(!answer?.processing, "Can't submit processing Answer")
+        assert(answer?.error_msg.length == 0, "Can't submit Answer with error message")
+
+        let body: BodyOfferwallSoftpairPostProductIdOfferwall37d1da64OfferwallIdPost = {
+            'answers': [{
+                "question_id": question.question_id,
+                "answer": answer.values
+            } as UserQuestionAnswerIn
+            ]
+        }
+
+        new OfferwallApi().offerwallSoftpairPostProductIdOfferwall37d1da64OfferwallIdPost(app.bpid, app.offerwall_id, app.bpuid, body)
+            .then(res => {
+                if (res.status == 200) {
+                    dispatch(setAvailabilityCount(res.data.offerwall.availability_count))
+                    dispatch(setOfferwallId(res.data.offerwall.id))
+                    dispatch(setBuckets(res.data.offerwall.buckets))
+                } else {
+                    // let error_msg = res.data.msg
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
+    return (
+        <Sheet>
+            <SheetTrigger>Open</SheetTrigger>
+            <SheetContent
+                side="right"
+                className="md:w-[900px], lg:w-[1000px]">
+
+                <SheetHeader>
+                    <SheetTitle>Bucket Questions</SheetTitle>
+                    <SheetDescription>
+                        This survey has some unanswered questions. Answer these to determine if you're
+                        eligible for the Survey Bucket
+                    </SheetDescription>
+                </SheetHeader>
+
+                {
+                    questions.map(q => {
+                        return <ProfileQuestionFull
+                            key={q.question_id}
+                            question={q}
+                            submitAnswerEvt={submitEvt}
+                            className="mt-4 m-2"/>
+                    })
+                }
+
+            </SheetContent>
+        </Sheet>
+    )
+}
+
 const CallToAction: React.FC<SoftPairBucket> = ({bucket}) => {
     switch (bucket.eligibility) {
         case "eligible":
@@ -28,9 +109,7 @@ const CallToAction: React.FC<SoftPairBucket> = ({bucket}) => {
                 </button>
             </Link>;
         case "conditional":
-            return <button type="button">
-                Unlock Survey
-            </button>;
+            return <ConditionalQuestions bucket={bucket}/>
 
         case "ineligible":
             return <button type="button">
