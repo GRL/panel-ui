@@ -15,8 +15,13 @@ const questionSlice = createSlice({
     name: 'questions',
     initialState,
     reducers: {
+        // setQuestions(state, action: PayloadAction<ProfileQuestion[]>) {
+        //     return action.payload;
+        // },
         setQuestions(state, action: PayloadAction<ProfileQuestion[]>) {
-            return action.payload;
+            const existingIds = new Set(state.map(q => q.question_id));
+            const newQuestions = action.payload.filter(q => !existingIds.has(q.question_id));
+            state.push(...newQuestions);
         },
         questionAdded(state, action: PayloadAction<ProfileQuestion>) {
             state.push(action.payload);
