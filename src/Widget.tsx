@@ -6,9 +6,11 @@ import {Offerwall} from "@/pages/Offerwall.tsx"
 import {QuestionsPage} from "@/pages/Questions.tsx";
 
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
-import {OfferwallApi, ProfilingQuestionsApi} from "@/api";
+import {CashoutMethodOut, OfferwallApi, ProfilingQuestionsApi, UserWalletBalance, WalletApi} from "@/api";
 import {ProfileQuestion, setQuestions} from "@/models/questionSlice.ts";
 import {setBuckets} from "@/models/bucketSlice.ts";
+import {setCashoutMethods} from "@/models/cashoutMethodSlice.ts";
+import {setWallet} from "@/models/walletSlice.ts"
 import {CashoutMethodsPage} from "@/pages/CashoutMethods.tsx";
 import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts"
 
@@ -24,7 +26,6 @@ const Widget = () => {
         // https://fsb.generalresearch.com/{product_id}/offerwall/37d1da64/?country
         new OfferwallApi().offerwallSoftpairProductIdOfferwall37d1da64Get(app.bpid, app.bpuid, "104.9.125.144")
             .then(res => {
-
                 // We want to set these questions first, because the Bucket Component views may do
                 // some redux lookups
                 const objects: ProfileQuestion[] = Object.values(res.data.offerwall.question_info) as ProfileQuestion[]
@@ -41,6 +42,21 @@ const Widget = () => {
                 dispatch(setQuestions(res.data.questions as ProfileQuestion[]))
             })
             .catch(err => console.log(err));
+
+        new WalletApi().getCashoutMethodsProductIdCashoutMethodsGet(app.bpid, app.bpuid)
+            .then(res => {
+                dispatch(setCashoutMethods(res.data.cashout_methods as CashoutMethodOut[]))
+            })
+            .catch(err => console.log(err))
+
+        new WalletApi().getUserWalletBalanceProductIdWalletGet(app.bpid, app.bpuid)
+            .then(res => {
+                dispatch(setWallet(res.data.wallet as UserWalletBalance))
+            })
+            .catch(err => {
+                // TODO: Wallet mode is likely off
+            })
+
     }, []); // ← empty array means "run once"
 
 
@@ -56,7 +72,7 @@ const Widget = () => {
                             <div className="px-4 lg:px-6">
                                 {app.currentPage === 'offerwall' && <Offerwall/>}
                                 {app.currentPage === 'questions' && <QuestionsPage/>}
-                                {app.currentPage === 'cashouts' && <CashoutMethodsPage/>}
+                                {app.currentPage === 'cashout_methods' && <CashoutMethodsPage/>}
                             </div>
                         </div>
                     </div>

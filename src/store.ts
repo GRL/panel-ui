@@ -4,6 +4,8 @@ import bucketReducers from "@/models/bucketSlice.ts"
 import questionReducers from "@/models/questionSlice.ts"
 import appReducers from "@/models/appSlice.ts"
 import answerReducers from "@/models/answerSlice.ts"
+import cashoutMethodReducers from "@/models/cashoutMethodSlice.ts"
+import walletReducers from "@/models/walletSlice.ts"
 
 export const store = configureStore({
     reducer: {
@@ -16,7 +18,10 @@ export const store = configureStore({
 
         // - Read Write
         // -- This stores user engagement (eg: answering any questions)
-        answers: answerReducers
+        answers: answerReducers,
+
+        cashoutMethods: cashoutMethodReducers,
+        wallet: walletReducers
     }
 })
 

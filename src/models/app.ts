@@ -1,4 +1,4 @@
-export type Page = 'offerwall' | 'questions' | 'cashouts';
+export type Page = 'offerwall' | 'questions' | 'cashout_methods';
 
 export interface App {
     targetId: string,

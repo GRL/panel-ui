@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { motion } from "framer-motion";
+import {motion} from "framer-motion";
 import {Badge} from "@/components/ui/badge"
 import {Link} from '@mui/material';
 import {Tabs, TabsContent} from "@/components/ui/tabs"
@@ -18,14 +18,13 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/
 import {useSelector} from "react-redux";
 import {Switch} from "@/components/ui/switch"
 import {Card, CardContent, CardFooter} from "@/components/ui/card.tsx";
-import {makeSelectQuestionsByIds, ProfileQuestion} from "@/models/questionSlice.ts"
+import {makeSelectQuestionsByIds} from "@/models/questionSlice.ts"
 import {CheckIcon, MessageCircleQuestionIcon, XIcon} from "lucide-react"
 import {useAppDispatch, useAppSelector} from '@/hooks'
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet"
 import {ProfileQuestionFull} from "@/pages/Questions.tsx"
 import {Answer, selectAnswerForQuestion, submitAnswer} from "@/models/answerSlice.ts";
 import {assert, formatCentsToUSD, formatSeconds} from "@/lib/utils.ts";
-import {IQRBoxPlot} from "@/lib/snippets.tsx"
 import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts";
 import {setBuckets} from "@/models/bucketSlice.ts";
 
@@ -54,12 +53,12 @@ const ContentsGrid: React.FC<SoftPairBucket> = ({bucket}) => {
         {
             accessorKey: "loi",
             header: "Length",
-            cell: ({ getValue }) => formatSeconds(getValue() as number),
+            cell: ({getValue}) => formatSeconds(getValue() as number),
         },
         {
             accessorKey: "payout",
             header: "Payout",
-            cell: ({ getValue}) => formatCentsToUSD(getValue() as number)
+            cell: ({getValue}) => formatCentsToUSD(getValue() as number)
         },
     ]
 
@@ -73,7 +72,7 @@ const ContentsGrid: React.FC<SoftPairBucket> = ({bucket}) => {
 
     return (
         <div className="max-h-[120px] overflow-y-auto border rounded-md">
-            <Table className="text-sm [&_th]:px-2 [&_td]:px-2 [&_th]:py-1 [&_td]:py-1" >
+            <Table className="text-sm [&_th]:px-2 [&_td]:px-2 [&_th]:py-1 [&_td]:py-1">
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
@@ -123,6 +122,7 @@ const ConditionalQuestions: React.FC<SoftPairBucket> = ({bucket}) => {
     const app = useAppSelector(state => state.app)
 
     console.log("Conditional bucket:", questions, question, answer)
+    const [open, setOpen] = useState(false)
 
     const submitEvt = () => {
         dispatch(submitAnswer({question: question}))
@@ -153,32 +153,41 @@ const ConditionalQuestions: React.FC<SoftPairBucket> = ({bucket}) => {
     }
 
     return (
-        <Sheet>
-            <SheetTrigger>Open</SheetTrigger>
-            <SheetContent
-                side="right"
-                className="md:w-[900px], lg:w-[1000px]">
+        <>
+            <Button
+                variant="secondary"
+                className="w-full h-8 cursor-pointer"
+                onClick={() => setOpen(true)}
+            >
+                Check Eligibility
+            </Button>
 
-                <SheetHeader>
-                    <SheetTitle>Bucket Questions</SheetTitle>
-                    <SheetDescription>
-                        This survey has some unanswered questions. Answer these to determine if you're
-                        eligible for the Survey Bucket
-                    </SheetDescription>
-                </SheetHeader>
+            <Sheet open={open} onOpenChange={setOpen}>
+                <SheetContent
+                    side="right"
+                    className="md:w-[900px], lg:w-[1000px] p-5">
 
-                {
-                    questions.map(q => {
-                        return <ProfileQuestionFull
-                            key={q.question_id}
-                            question={q}
-                            submitAnswerEvt={submitEvt}
-                            className="mt-4 m-2"/>
-                    })
-                }
+                    <SheetHeader>
+                        <SheetTitle>Bucket Questions</SheetTitle>
+                        <SheetDescription>
+                            This survey has some unanswered questions. Answer these to determine if you're
+                            eligible for the Survey Bucket
+                        </SheetDescription>
+                    </SheetHeader>
 
-            </SheetContent>
-        </Sheet>
+                    {
+                        questions.map(q => {
+                            return <ProfileQuestionFull
+                                key={q.question_id}
+                                question={q}
+                                submitAnswerEvt={submitEvt}
+                                className="mt-4 m-2"/>
+                        })
+                    }
+
+                </SheetContent>
+            </Sheet>
+        </>
     )
 }
 
@@ -201,22 +210,24 @@ const CallToAction: React.FC<SoftPairBucket> = ({bucket}) => {
                 </div>
             )
         case "conditional":
-            // return <ConditionalQuestions bucket={bucket}/>
             return (
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[90%]">
-                    <Button
-                        variant="secondary"
-                        className="w-full h-8 cursor-pointer"
-                    >
-                        Check Eligibility
-                    </Button>
+                    <ConditionalQuestions bucket={bucket}/>
                 </div>
             )
 
         case "ineligible":
-            return <button type="button">
-                Ineligible Survey
-            </button>;
+            return (
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[90%]">
+                    <Button
+                        className="w-full h-8 cursor-pointer"
+                        variant="outline"
+                        disabled
+                    >
+                        Sorry, you're ineligible
+                    </Button>
+                </div>
+            )
     }
 }
 
