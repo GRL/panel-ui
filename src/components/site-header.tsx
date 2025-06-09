@@ -21,6 +21,7 @@ const SiteHeader = () => {
                     {app.currentPage === 'offerwall' && "Offerwall"}
                     {app.currentPage === 'questions' && "Profiling Questions"}
                     {app.currentPage === 'cashouts' && "Cashout Methods"}
+                    {app.currentPage === 'demographics' && "User Demographics"}
                 </h1>
 
             </div>

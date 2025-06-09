@@ -9,6 +9,7 @@ import walletReducers from "@/models/walletSlice.ts"
 import upkQuestionReducers from "@/models/upkQuestionSlice"
 import userUpkAnswerReducers from "@/models/userUpkAnswerSlice.ts"
 import userMarketplaceReducers from "@/models/userMarketplaceAnswerSlice.ts"
+import userProfileReducers from "@/models/userProfileSlice.ts"
 
 export const store = configureStore({
     reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
         questions: questionReducers,
         upkQuestions: upkQuestionReducers,
 
+        userProfile: userProfileReducers,
         userUpkAnswers: userUpkAnswerReducers,
         userMarketplaceAnswers: userMarketplaceReducers,
 

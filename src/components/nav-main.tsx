@@ -72,13 +72,6 @@ export function NavMain() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
-                    <SidebarMenuItem key="community">
-                        <SidebarMenuButton tooltip="Community">
-                            <Users/>
-                            <span>Community</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>

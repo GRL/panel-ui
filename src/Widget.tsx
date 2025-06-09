@@ -11,6 +11,7 @@ import {
     CashoutMethodOut,
     MarketProfileKnowledge,
     OfferwallApi,
+    ProductUserApi,
     ProfilingQuestionsApi,
     QuestionInfo,
     UserProfileKnowledge,
@@ -26,6 +27,7 @@ import {setUpkQuestions} from "@/models/upkQuestionSlice.ts"
 import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts"
 import {setUpkAnswers} from "@/models/userUpkAnswerSlice.ts";
 import {setMarketplaceAnswers} from "@/models/userMarketplaceAnswerSlice.ts";
+import {setUserProfile} from "@/models/userProfileSlice.ts";
 
 import './index.css';
 
@@ -49,6 +51,12 @@ const Widget = () => {
                 dispatch(setBuckets(res.data.offerwall.buckets))
             })
             .catch(err => console.log(err));
+
+        new ProductUserApi().userProfileProductIdUserProductUserIdProfileGet(app.bpid, app.bpuid)
+            .then(res => {
+                dispatch(setUserProfile(res.data["user-profile"]))
+            })
+            .catch(err => console.log(err))
 
         new ProfilingQuestionsApi().getProfilingQuestionsProductIdProfilingQuestionsGet(app.bpid, app.bpuid, "104.9.125.144", undefined, undefined, 2500)
             .then(res => {

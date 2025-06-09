@@ -2,12 +2,14 @@ import React from "react";
 import {useSelector} from "react-redux";
 import {selectUserAge, selectUserGender, selectUserUpkAnswers, selectUserZip} from "@/models/userUpkAnswerSlice.ts";
 import {titleCase} from "@/lib/utils.ts";
+import { formatDistanceToNow } from 'date-fns'
 
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
-import {Calendar, MapPin, User} from "lucide-react";
-import {BucketTask} from "@/api";
+import {Calendar, MapPin, User, PersonStanding} from "lucide-react";
+import {BucketTask, UserProfile} from "@/api";
 import {ColumnDef, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
+import {useAppSelector} from "@/hooks.ts";
 
 export const UpkGrid = () => {
 
@@ -80,11 +82,19 @@ export const ContactCard = () => {
     const zip = useSelector(selectUserZip)
     const gender = useSelector(selectUserGender)
 
+    const userProfile: UserProfile = useAppSelector(state => state.userProfile)
+
+    const created: string = formatDistanceToNow(new Date(userProfile.user.created), { addSuffix: true })
+
     return (
         <Card className="w-full max-w-sm shadow-md rounded-2xl p-4">
             <CardHeader className="flex items-center space-x-4">
                 <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
                     <User className="text-gray-500"/>
+                </div>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <PersonStanding className="w-4 h-4"/>
+                    <span>Created: {created}</span>
                 </div>
             </CardHeader>
 
@@ -112,7 +122,7 @@ const Demographics = () => {
     return (
         <>
             <ContactCard/>
-            <UpkGrid />
+            <UpkGrid/>
         </>
     )
 }
