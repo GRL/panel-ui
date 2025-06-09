@@ -3,7 +3,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {UserWalletBalance} from "@/api";
 
 
-const initialState: UserWalletBalance = {};
+const initialState: UserWalletBalance = {} as UserWalletBalance;
 
 
 const walletSlice = createSlice({

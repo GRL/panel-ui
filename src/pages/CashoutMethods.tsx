@@ -3,6 +3,7 @@ import {Card, CardContent, CardHeader,} from "@/components/ui/card"
 import {Tabs, TabsContent, TabsList, TabsTrigger,} from "@/components/ui/tabs"
 import {Badge} from "@/components/ui/badge"
 
+import { Input } from "@/components/ui/input"
 import {selectFixedCashoutMethods, selectVariableCashoutMethods} from "@/models/cashoutMethodSlice.ts";
 import {CashoutMethodOut, UserWalletBalance} from "@/api"
 import {formatCentsToUSD} from "@/lib/utils.ts";
@@ -43,6 +44,15 @@ const CashoutReview: React.FC<{ cashout_method: CashoutMethodOut }> = ({cashout_
                     className="btn btn-block">Submit
             </button>
             <p id="cashout-review-msg"></p>
+        </>
+    )
+}
+
+const CreateCashout = () => {
+
+    return (
+        <>
+            <Input type="email" placeholder="Email" />
         </>
     )
 }

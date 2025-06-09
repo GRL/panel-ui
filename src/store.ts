@@ -6,6 +6,9 @@ import appReducers from "@/models/appSlice.ts"
 import answerReducers from "@/models/answerSlice.ts"
 import cashoutMethodReducers from "@/models/cashoutMethodSlice.ts"
 import walletReducers from "@/models/walletSlice.ts"
+import upkQuestionReducers from "@/models/upkQuestionSlice"
+import upkAnswerReducers from "@/models/upkAnswerSlice"
+import marketplaceReducers from "@/models/marketplaceAnswerSlice"
 
 export const store = configureStore({
     reducer: {
@@ -14,7 +17,11 @@ export const store = configureStore({
         // - Read Only
         // -- These act as API cache stores to allow background loading
         buckets: bucketReducers,
+
         questions: questionReducers,
+        upkQuestions: upkQuestionReducers,
+        upkAnswers: upkAnswerReducers,
+        marketplaceAnswers: marketplaceReducers,
 
         // - Read Write
         // -- This stores user engagement (eg: answering any questions)

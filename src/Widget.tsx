@@ -6,12 +6,13 @@ import {Offerwall} from "@/pages/Offerwall.tsx"
 import {QuestionsPage} from "@/pages/Questions.tsx";
 
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
-import {CashoutMethodOut, OfferwallApi, ProfilingQuestionsApi, UserWalletBalance, WalletApi} from "@/api";
+import {CashoutMethodOut, OfferwallApi, ProfilingQuestionsApi, QuestionInfo, UserWalletBalance, WalletApi} from "@/api";
 import {ProfileQuestion, setQuestions} from "@/models/questionSlice.ts";
 import {setBuckets} from "@/models/bucketSlice.ts";
 import {setCashoutMethods} from "@/models/cashoutMethodSlice.ts";
 import {setWallet} from "@/models/walletSlice.ts"
 import {CashoutMethodsPage} from "@/pages/CashoutMethods.tsx";
+import {setUpkQuestions} from "@/models/upkQuestionSlice.ts"
 import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts"
 
 import './index.css';
@@ -42,6 +43,18 @@ const Widget = () => {
                 dispatch(setQuestions(res.data.questions as ProfileQuestion[]))
             })
             .catch(err => console.log(err));
+
+        new ProfilingQuestionsApi().userProfileProductIdUserProfileGet(app.bpid, app.bpuid, "us")
+            .then(res => {
+                console.log("Marketplace Profile", res.data["user-profile"].marketplace_profile_knowledge)
+                console.log("UPK Profile", res.data["user-profile"].user_profile_knowledge)
+            }).catch(err => console.log(err))
+
+        new ProfilingQuestionsApi().profilingInfoProductIdProfilingInfoGet(app.bpid, "us")
+            .then(res => {
+                dispatch(setUpkQuestions(res.data["profiling-info"] as QuestionInfo[]))
+            })
+            .catch(err => console.log(err))
 
         new WalletApi().getCashoutMethodsProductIdCashoutMethodsGet(app.bpid, app.bpuid)
             .then(res => {
