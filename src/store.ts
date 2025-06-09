@@ -10,6 +10,8 @@ import upkQuestionReducers from "@/models/upkQuestionSlice"
 import userUpkAnswerReducers from "@/models/userUpkAnswerSlice.ts"
 import userMarketplaceReducers from "@/models/userMarketplaceAnswerSlice.ts"
 import userProfileReducers from "@/models/userProfileSlice.ts"
+import transactionHistoryReducers from "@/models/transactionHistorySlice.ts"
+import taskStatusReducers from "@/models/taskStatusSlice.ts"
 
 export const store = configureStore({
     reducer: {
@@ -18,6 +20,7 @@ export const store = configureStore({
         // - Read Only
         // -- These act as API cache stores to allow background loading
         buckets: bucketReducers,
+        taskStatus: taskStatusReducers,
 
         questions: questionReducers,
         upkQuestions: upkQuestionReducers,
@@ -31,7 +34,8 @@ export const store = configureStore({
         answers: answerReducers,
 
         cashoutMethods: cashoutMethodReducers,
-        wallet: walletReducers
+        wallet: walletReducers,
+        transactionHistory: transactionHistoryReducers
     }
 })
 

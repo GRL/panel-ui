@@ -5,6 +5,9 @@ import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar"
 import {Offerwall} from "@/pages/Offerwall.tsx"
 import {QuestionsPage} from "@/pages/Questions.tsx";
 import {Demographics} from "@/pages/Demographics.tsx"
+import {CashoutMethodsPage} from "@/pages/CashoutMethods.tsx";
+import {TransactionHistoryPage} from "@/pages/TransactionHistory.tsx"
+import {TaskAttemptHistoryPage} from "@/pages/TaskAttemptHistory.tsx";
 
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
 import {
@@ -14,6 +17,7 @@ import {
     ProductUserApi,
     ProfilingQuestionsApi,
     QuestionInfo,
+    StatusApi,
     UserProfileKnowledge,
     UserWalletBalance,
     WalletApi
@@ -22,12 +26,12 @@ import {ProfileQuestion, setQuestions} from "@/models/questionSlice.ts";
 import {setBuckets} from "@/models/bucketSlice.ts";
 import {setCashoutMethods} from "@/models/cashoutMethodSlice.ts";
 import {setWallet} from "@/models/walletSlice.ts"
-import {CashoutMethodsPage} from "@/pages/CashoutMethods.tsx";
 import {setUpkQuestions} from "@/models/upkQuestionSlice.ts"
 import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts"
 import {setUpkAnswers} from "@/models/userUpkAnswerSlice.ts";
 import {setMarketplaceAnswers} from "@/models/userMarketplaceAnswerSlice.ts";
 import {setUserProfile} from "@/models/userProfileSlice.ts";
+import {setTaskStatuses} from "@/models/taskStatusSlice.ts"
 
 import './index.css';
 
@@ -51,6 +55,12 @@ const Widget = () => {
                 dispatch(setBuckets(res.data.offerwall.buckets))
             })
             .catch(err => console.log(err));
+
+        new StatusApi().listTaskStatusesProductIdStatusGet(app.bpid, app.bpuid)
+            .then(res => {
+                dispatch(setTaskStatuses(res.data.tasks_status))
+            })
+            .catch(err => console.log(err))
 
         new ProductUserApi().userProfileProductIdUserProductUserIdProfileGet(app.bpid, app.bpuid)
             .then(res => {
@@ -106,7 +116,10 @@ const Widget = () => {
                                 {app.currentPage === 'offerwall' && <Offerwall/>}
                                 {app.currentPage === 'questions' && <QuestionsPage/>}
                                 {app.currentPage === 'cashout_methods' && <CashoutMethodsPage/>}
+                                {app.currentPage === 'task_attempts' && <TaskAttemptHistoryPage/>}
+
                                 {app.currentPage === 'demographics' && <Demographics/>}
+                                {app.currentPage === 'transaction_history' && <TransactionHistoryPage/>}
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-export type Page = 'offerwall' | 'questions' | 'demographics' | 'cashout_methods';
+export type Page = 'offerwall' | 'questions' | 'demographics' | 'task_attempts' | 'cashout_methods'  | 'transaction_history';
 
 export interface App {
     targetId: string,

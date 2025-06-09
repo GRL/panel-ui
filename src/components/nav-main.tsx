@@ -1,6 +1,6 @@
 "use client"
 
-import {ListIcon, NotebookText, Users, User} from "lucide-react"
+import {ListIcon, NotebookText, Users, User, Activity} from "lucide-react"
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -21,6 +21,7 @@ export function NavMain() {
     const app = useAppSelector(state => state.app)
     const questions = useSelector(selectQuestions)
     const upkAnswers = useSelector(selectUserUpkAnswers)
+    const taskAttempts = useAppSelector(state => state.taskStatus)
 
     return (
         <SidebarGroup>
@@ -68,6 +69,20 @@ export function NavMain() {
                                 className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
                                 variant="outline"
                             >{upkAnswers.length.toLocaleString()}</Badge>
+                            </span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem key="task_attempts"
+                                     onClick={() => dispatch(setPage("task_attempts"))}
+                    >
+                        <SidebarMenuButton tooltip="Survey History">
+                            <Activity/>
+                            <span>
+                                Survey History <Badge
+                                className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
+                                variant="outline"
+                            >{taskAttempts.length.toLocaleString()}</Badge>
                             </span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

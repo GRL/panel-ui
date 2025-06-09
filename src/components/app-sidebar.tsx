@@ -21,11 +21,13 @@ import {setPage} from "@/models/appSlice.ts";
 import {Badge} from "@/components/ui/badge.tsx";
 import {useSelector} from "react-redux";
 import {selectCashoutMethods} from "@/models/cashoutMethodSlice.ts";
+import {selectTransactionHistory} from "@/models/transactionHistorySlice.ts";
 
 export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
     const app = useAppSelector(state => state.app)
     const dispatch = useAppDispatch()
     const cashoutMethods = useSelector(selectCashoutMethods)
+    const transactionHistory = useSelector(selectTransactionHistory)
 
     const {isMobile} = useSidebar()
 
@@ -76,11 +78,19 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
 
-                            <SidebarMenuItem key="cashout_history">
+                            <SidebarMenuItem
+                                key="transaction_hisotry"
+                                className="cursor-pointer"
+                            >
                                 <SidebarMenuButton asChild>
-                                    <a href="#">
+                                    <a
+                                        onClick={() => dispatch(setPage("transaction_history"))}
+                                    >
                                         <SquareStack/>
-                                        <span>History</span>
+                                        <span>History <Badge
+                                            className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
+                                            variant="outline"
+                                        >{transactionHistory.length.toLocaleString()}</Badge></span>
                                     </a>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>

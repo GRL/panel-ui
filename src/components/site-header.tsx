@@ -20,8 +20,10 @@ const SiteHeader = () => {
                 <h1 className="text-base font-medium">
                     {app.currentPage === 'offerwall' && "Offerwall"}
                     {app.currentPage === 'questions' && "Profiling Questions"}
-                    {app.currentPage === 'cashouts' && "Cashout Methods"}
                     {app.currentPage === 'demographics' && "User Demographics"}
+                    {app.currentPage === 'task_attempts' && "Task Attempts"}
+                    {app.currentPage === 'cashouts' && "Cashout Methods"}
+                    {app.currentPage === 'transaction_history' && 'Transaction History'}
                 </h1>
 
             </div>
