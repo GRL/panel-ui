@@ -34,3 +34,10 @@ export function formatCentsToUSD(cents: number): string {
         currency: 'USD',
     }).format(cents / 100)
 }
+
+export function titleCase(str: string): string {
+    return str
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}

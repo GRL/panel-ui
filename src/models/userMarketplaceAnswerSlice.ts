@@ -1,12 +1,13 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {MarketProfileKnowledge} from "@/api";
+import type {RootState} from '@/store'
 
-const marketplaceInitialState: MarketProfileKnowledge[] = []
+const initialState: MarketProfileKnowledge[] = []
 
 
-const marketplaceAnswerSlice = createSlice({
-    name: 'marketplaceAnswers',
-    marketplaceInitialState,
+const userMarketplaceAnswerSlice = createSlice({
+    name: 'userMarketplaceAnswers',
+    initialState,
     reducers: {
         setMarketplaceAnswers(state, action: PayloadAction<MarketProfileKnowledge[]>) {
             // TODO: Does this need question_id + source uniqueness?
@@ -19,6 +20,8 @@ const marketplaceAnswerSlice = createSlice({
 
 export const {
     setMarketplaceAnswers,
-} = marketplaceAnswerSlice.actions;
+} = userMarketplaceAnswerSlice.actions;
 
-export default marketplaceAnswerSlice.reducer;
+export default userMarketplaceAnswerSlice.reducer;
+
+export const selectUserMarketplaceAnswers = (state: RootState) => state.userMarketplaceAnswers

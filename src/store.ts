@@ -7,8 +7,8 @@ import answerReducers from "@/models/answerSlice.ts"
 import cashoutMethodReducers from "@/models/cashoutMethodSlice.ts"
 import walletReducers from "@/models/walletSlice.ts"
 import upkQuestionReducers from "@/models/upkQuestionSlice"
-import upkAnswerReducers from "@/models/upkAnswerSlice"
-import marketplaceReducers from "@/models/marketplaceAnswerSlice"
+import userUpkAnswerReducers from "@/models/userUpkAnswerSlice.ts"
+import userMarketplaceReducers from "@/models/userMarketplaceAnswerSlice.ts"
 
 export const store = configureStore({
     reducer: {
@@ -20,8 +20,9 @@ export const store = configureStore({
 
         questions: questionReducers,
         upkQuestions: upkQuestionReducers,
-        upkAnswers: upkAnswerReducers,
-        marketplaceAnswers: marketplaceReducers,
+
+        userUpkAnswers: userUpkAnswerReducers,
+        userMarketplaceAnswers: userMarketplaceReducers,
 
         // - Read Write
         // -- This stores user engagement (eg: answering any questions)

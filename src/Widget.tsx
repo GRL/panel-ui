@@ -4,9 +4,19 @@ import {SiteHeader} from "@/components/site-header"
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar"
 import {Offerwall} from "@/pages/Offerwall.tsx"
 import {QuestionsPage} from "@/pages/Questions.tsx";
+import {Demographics} from "@/pages/Demographics.tsx"
 
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
-import {CashoutMethodOut, OfferwallApi, ProfilingQuestionsApi, QuestionInfo, UserWalletBalance, WalletApi} from "@/api";
+import {
+    CashoutMethodOut,
+    MarketProfileKnowledge,
+    OfferwallApi,
+    ProfilingQuestionsApi,
+    QuestionInfo,
+    UserProfileKnowledge,
+    UserWalletBalance,
+    WalletApi
+} from "@/api";
 import {ProfileQuestion, setQuestions} from "@/models/questionSlice.ts";
 import {setBuckets} from "@/models/bucketSlice.ts";
 import {setCashoutMethods} from "@/models/cashoutMethodSlice.ts";
@@ -14,6 +24,8 @@ import {setWallet} from "@/models/walletSlice.ts"
 import {CashoutMethodsPage} from "@/pages/CashoutMethods.tsx";
 import {setUpkQuestions} from "@/models/upkQuestionSlice.ts"
 import {setAvailabilityCount, setOfferwallId} from "@/models/appSlice.ts"
+import {setUpkAnswers} from "@/models/userUpkAnswerSlice.ts";
+import {setMarketplaceAnswers} from "@/models/userMarketplaceAnswerSlice.ts";
 
 import './index.css';
 
@@ -46,8 +58,8 @@ const Widget = () => {
 
         new ProfilingQuestionsApi().userProfileProductIdUserProfileGet(app.bpid, app.bpuid, "us")
             .then(res => {
-                console.log("Marketplace Profile", res.data["user-profile"].marketplace_profile_knowledge)
-                console.log("UPK Profile", res.data["user-profile"].user_profile_knowledge)
+                dispatch(setMarketplaceAnswers(res.data["user-profile"].marketplace_profile_knowledge as MarketProfileKnowledge[]))
+                dispatch(setUpkAnswers(res.data["user-profile"].user_profile_knowledge as UserProfileKnowledge[]))
             }).catch(err => console.log(err))
 
         new ProfilingQuestionsApi().profilingInfoProductIdProfilingInfoGet(app.bpid, "us")
@@ -86,6 +98,7 @@ const Widget = () => {
                                 {app.currentPage === 'offerwall' && <Offerwall/>}
                                 {app.currentPage === 'questions' && <QuestionsPage/>}
                                 {app.currentPage === 'cashout_methods' && <CashoutMethodsPage/>}
+                                {app.currentPage === 'demographics' && <Demographics/>}
                             </div>
                         </div>
                     </div>
