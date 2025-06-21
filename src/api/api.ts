@@ -527,6 +527,232 @@ export interface CategoryAssociation {
     'p': number;
 }
 /**
+ * Defines the conditions to evaluate to determine when the contest is over. Multiple conditions can be set. The contest is over once ANY conditions are met.
+ * @export
+ * @interface ContestEndCondition
+ */
+export interface ContestEndCondition {
+    /**
+     * 
+     * @type {ContestEndConditionTargetEntryAmount}
+     * @memberof ContestEndCondition
+     */
+    'target_entry_amount'?: ContestEndConditionTargetEntryAmount | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ContestEndCondition
+     */
+    'ends_at'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface ContestEndConditionTargetEntryAmount
+ */
+export interface ContestEndConditionTargetEntryAmount {
+}
+/**
+ * Defines why a contest ended
+ * @export
+ * @enum {string}
+ */
+
+export const ContestEndReason = {
+    Cancelled: 'cancelled',
+    TargetEntryAmount: 'target_entry_amount',
+    EndsAt: 'ends_at',
+    MaxWinners: 'max_winners'
+} as const;
+
+export type ContestEndReason = typeof ContestEndReason[keyof typeof ContestEndReason];
+
+
+/**
+ * Defines rules the user must meet to be allowed to enter this contest Only applies if the ContestType is ENTRY!
+ * @export
+ * @interface ContestEntryRule
+ */
+export interface ContestEntryRule {
+    /**
+     * 
+     * @type {MaxEntryAmountPerUser}
+     * @memberof ContestEntryRule
+     */
+    'max_entry_amount_per_user'?: MaxEntryAmountPerUser | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ContestEntryRule
+     */
+    'max_daily_entries_per_user'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ContestEntryRule
+     */
+    'min_completes'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ContestEntryRule
+     */
+    'min_membership_level'?: number | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ContestEntryRule
+     */
+    'id_verified'?: boolean | null;
+}
+/**
+ * Defines what action/event triggers a (possible) entry into the contest (automatically). This only is valid on milestone contests
+ * @export
+ * @enum {string}
+ */
+
+export const ContestEntryTrigger = {
+    TaskComplete: 'task_complete',
+    TaskAttempt: 'task_attempt',
+    Referral: 'referral'
+} as const;
+
+export type ContestEntryTrigger = typeof ContestEntryTrigger[keyof typeof ContestEntryTrigger];
+
+
+/**
+ * All entries into a contest must be of the same type, and match the entry_type of the Contest itself.
+ * @export
+ * @enum {string}
+ */
+
+export const ContestEntryType = {
+    Count: 'count',
+    Cash: 'cash'
+} as const;
+
+export type ContestEntryType = typeof ContestEntryType[keyof typeof ContestEntryType];
+
+
+/**
+ * 
+ * @export
+ * @interface ContestPrize
+ */
+export interface ContestPrize {
+    /**
+     *  Allowed values:   - __physical__ *(PHYSICAL)*: A physical prize (e.g. a iPhone, cash in the mail, dinner with Max)  - __promotion__ *(PROMOTION)*: A promotion is a temporary or special offer that provides extra value or benefits (e.g. 20% bonus on completes for the next 7 days)  - __cash__ *(CASH)*: Money is deposited into user\'s virtual wallet
+     * @type {ContestPrizeKind}
+     * @memberof ContestPrize
+     */
+    'kind': ContestPrizeKind;
+    /**
+     * 
+     * @type {string}
+     * @memberof ContestPrize
+     */
+    'name'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ContestPrize
+     */
+    'description'?: string | null;
+    /**
+     * Estimated cash value of prize in USDCents
+     * @type {number}
+     * @memberof ContestPrize
+     */
+    'estimated_cash_value': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ContestPrize
+     */
+    'cash_amount'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ContestPrize
+     */
+    'promotion_id'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ContestPrize
+     */
+    'leaderboard_rank'?: number | null;
+}
+
+
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const ContestPrizeKind = {
+    Physical: 'physical',
+    Promotion: 'promotion',
+    Cash: 'cash'
+} as const;
+
+export type ContestPrizeKind = typeof ContestPrizeKind[keyof typeof ContestPrizeKind];
+
+
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const ContestStatus = {
+    Active: 'active',
+    Completed: 'completed',
+    Cancelled: 'cancelled'
+} as const;
+
+export type ContestStatus = typeof ContestStatus[keyof typeof ContestStatus];
+
+
+/**
+ * In a Raffle, the ContestEntryType can be COUNT or CASH. In the CASH type, the unit of entry is 1 USDCent (one penny). Implicitly, each penny entered buys 1 entry into the raffle, and one entry is randomly selected for each prize.  A contest should have as many winners as there are prizes special case 1: there are fewer entries than prizes special case 2: leaderboard contest with ties
+ * @export
+ * @interface ContestWinner
+ */
+export interface ContestWinner {
+    /**
+     * 
+     * @type {string}
+     * @memberof ContestWinner
+     */
+    'uuid'?: string;
+    /**
+     * When this user won this prize
+     * @type {string}
+     * @memberof ContestWinner
+     */
+    'created_at'?: string;
+    /**
+     * 
+     * @type {ContestPrize}
+     * @memberof ContestWinner
+     */
+    'prize': ContestPrize;
+    /**
+     * 
+     * @type {number}
+     * @memberof ContestWinner
+     */
+    'awarded_cash_amount'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ContestWinner
+     */
+    'product_user_id': string | null;
+}
+/**
  * 
  * @export
  * @interface CountStat
@@ -634,6 +860,13 @@ export const CreatePayPalCashoutMethodRequestTypeEnum = {
 
 export type CreatePayPalCashoutMethodRequestTypeEnum = typeof CreatePayPalCashoutMethodRequestTypeEnum[keyof typeof CreatePayPalCashoutMethodRequestTypeEnum];
 
+/**
+ * Sum of all entry amounts
+ * @export
+ * @interface CurrentAmount
+ */
+export interface CurrentAmount {
+}
 /**
  * @type Data
  * @export
@@ -1025,6 +1258,210 @@ export type LeaderboardWinnerResponseStatusEnum = typeof LeaderboardWinnerRespon
 /**
  * 
  * @export
+ * @interface ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+ */
+export interface ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner {
+    /**
+     * Name of contest. Can be displayed to user.
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'contest_type'?: ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerContestTypeEnum;
+    /**
+     * 
+     * @type {MilestoneContestEndCondition}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'end_condition': MilestoneContestEndCondition;
+    /**
+     * 
+     * @type {Array<ContestPrize>}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'prizes'?: Array<ContestPrize>;
+    /**
+     * When the contest starts
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'starts_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'terms_and_conditions'?: string;
+    /**
+     * 
+     * @type {ContestStatus}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'status'?: ContestStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'country_isos'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'uuid'?: string;
+    /**
+     * Contest applies only to a single BP
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'product_id': string;
+    /**
+     * When this contest was created
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'created_at'?: string;
+    /**
+     * When this contest was last modified. Does not include entries being created/modified
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'ended_at'?: string;
+    /**
+     * 
+     * @type {ContestEndReason}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'end_reason'?: ContestEndReason;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'product_user_id': string;
+    /**
+     * The prizes won in this contest by the requested user
+     * @type {Array<ContestWinner>}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'user_winnings'?: Array<ContestWinner>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'entry_type': ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerEntryTypeEnum;
+    /**
+     * 
+     * @type {ContestEntryRule}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'entry_rule'?: ContestEntryRule;
+    /**
+     * 
+     * @type {CurrentAmount}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'current_amount'?: CurrentAmount;
+    /**
+     * Count of unique participants
+     * @type {number}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'current_participants'?: number;
+    /**
+     * The total amount for this user for this contest
+     * @type {number}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'user_amount': number;
+    /**
+     * 
+     * @type {UserAmountToday}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'user_amount_today': UserAmountToday;
+    /**
+     * Probability of this user winning 1 or more prizes, if the contestended right now
+     * @type {number}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'current_win_probability': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'projected_win_probability': number;
+    /**
+     * Each user \'wins\' (receives prizes) once this target amount is reached.
+     * @type {number}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'target_amount': number;
+    /**
+     * 
+     * @type {ContestEntryTrigger}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'entry_trigger'?: ContestEntryTrigger;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'valid_for'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'valid_for_event'?: ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerValidForEventEnum;
+    /**
+     * The number of times the milestone has been reached.
+     * @type {number}
+     * @memberof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner
+     */
+    'win_count'?: number;
+}
+
+export const ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerContestTypeEnum = {
+    Milestone: 'milestone'
+} as const;
+
+export type ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerContestTypeEnum = typeof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerContestTypeEnum[keyof typeof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerContestTypeEnum];
+export const ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerEntryTypeEnum = {
+    Count: 'count'
+} as const;
+
+export type ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerEntryTypeEnum = typeof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerEntryTypeEnum[keyof typeof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerEntryTypeEnum];
+export const ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerValidForEventEnum = {
+    Signup: 'signup'
+} as const;
+
+export type ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerValidForEventEnum = typeof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerValidForEventEnum[keyof typeof ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInnerValidForEventEnum];
+
+/**
+ * 
+ * @export
  * @interface MarketProfileKnowledge
  */
 export interface MarketProfileKnowledge {
@@ -1254,6 +1691,200 @@ export interface MarketplaceSummary {
     'user_activity'?: string | null;
 }
 /**
+ * Maximum total value of entries per user
+ * @export
+ * @interface MaxEntryAmountPerUser
+ */
+export interface MaxEntryAmountPerUser {
+}
+/**
+ * Defines the conditions to evaluate to determine when the contest is over. Multiple conditions can be set. The contest is over once ANY conditions are met.
+ * @export
+ * @interface MilestoneContestEndCondition
+ */
+export interface MilestoneContestEndCondition {
+    /**
+     * 
+     * @type {number}
+     * @memberof MilestoneContestEndCondition
+     */
+    'max_winners'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneContestEndCondition
+     */
+    'ends_at'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface MilestoneUserView
+ */
+export interface MilestoneUserView {
+    /**
+     * Each user \'wins\' (receives prizes) once this target amount is reached.
+     * @type {number}
+     * @memberof MilestoneUserView
+     */
+    'target_amount': number;
+    /**
+     * 
+     * @type {ContestEntryTrigger}
+     * @memberof MilestoneUserView
+     */
+    'entry_trigger'?: ContestEntryTrigger | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'valid_for'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'valid_for_event'?: MilestoneUserViewValidForEventEnum | null;
+    /**
+     * Name of contest. Can be displayed to user.
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'description'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'contest_type'?: MilestoneUserViewContestTypeEnum;
+    /**
+     * 
+     * @type {MilestoneContestEndCondition}
+     * @memberof MilestoneUserView
+     */
+    'end_condition': MilestoneContestEndCondition;
+    /**
+     * 
+     * @type {Array<ContestPrize>}
+     * @memberof MilestoneUserView
+     */
+    'prizes'?: Array<ContestPrize>;
+    /**
+     * When the contest starts
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'starts_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'terms_and_conditions'?: string | null;
+    /**
+     * 
+     * @type {ContestStatus}
+     * @memberof MilestoneUserView
+     */
+    'status'?: ContestStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'country_isos'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'uuid'?: string;
+    /**
+     * Contest applies only to a single BP
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'product_id': string;
+    /**
+     * When this contest was created
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'created_at'?: string;
+    /**
+     * When this contest was last modified. Does not include entries being created/modified
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'ended_at'?: string | null;
+    /**
+     * 
+     * @type {ContestEndReason}
+     * @memberof MilestoneUserView
+     */
+    'end_reason'?: ContestEndReason | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'product_user_id': string;
+    /**
+     * The prizes won in this contest by the requested user
+     * @type {Array<ContestWinner>}
+     * @memberof MilestoneUserView
+     */
+    'user_winnings'?: Array<ContestWinner>;
+    /**
+     * 
+     * @type {string}
+     * @memberof MilestoneUserView
+     */
+    'entry_type'?: MilestoneUserViewEntryTypeEnum;
+    /**
+     * The number of times the milestone has been reached.
+     * @type {number}
+     * @memberof MilestoneUserView
+     */
+    'win_count'?: number;
+    /**
+     * The total amount for this user for this contest
+     * @type {number}
+     * @memberof MilestoneUserView
+     */
+    'user_amount': number;
+}
+
+export const MilestoneUserViewValidForEventEnum = {
+    Signup: 'signup'
+} as const;
+
+export type MilestoneUserViewValidForEventEnum = typeof MilestoneUserViewValidForEventEnum[keyof typeof MilestoneUserViewValidForEventEnum];
+export const MilestoneUserViewContestTypeEnum = {
+    Milestone: 'milestone'
+} as const;
+
+export type MilestoneUserViewContestTypeEnum = typeof MilestoneUserViewContestTypeEnum[keyof typeof MilestoneUserViewContestTypeEnum];
+export const MilestoneUserViewEntryTypeEnum = {
+    Count: 'count'
+} as const;
+
+export type MilestoneUserViewEntryTypeEnum = typeof MilestoneUserViewEntryTypeEnum[keyof typeof MilestoneUserViewEntryTypeEnum];
+
+/**
  * 
  * @export
  * @interface OfferWallInfo
@@ -1361,6 +1992,25 @@ export interface PatternValidation {
     'pattern': string;
 }
 /**
+ * Store configuration related to payouts, payout transformation, and user payout formatting.
+ * @export
+ * @interface PayoutConfig
+ */
+export interface PayoutConfig {
+    /**
+     * 
+     * @type {string}
+     * @memberof PayoutConfig
+     */
+    'payout_format'?: string | null;
+    /**
+     * 
+     * @type {PayoutTransformation}
+     * @memberof PayoutConfig
+     */
+    'payout_transformation'?: PayoutTransformation | null;
+}
+/**
  * The max size of the db field that holds this value is 20, so please don\'t add new values longer than that!
  * @export
  * @enum {string}
@@ -1434,6 +2084,57 @@ export interface PayoutSummary {
     'upper_whisker': number;
 }
 /**
+ * This model describe how the bp_payout is converted to the user_payout. If None, the user_payout is None.  If the user_wallet_enabled is `False`, the user_payout is used to     1) know how to transform the expected payouts for offerwall buckets         (if min_payout is requested, this is based on the user_payout)     2) show the user (using the payout_format) how much they made (in         the Task Status Response). If the user_wallet_enabled is `True`, then in addition to the above, the     user_payout is the amount actually paid to the user\'s wallet.
+ * @export
+ * @interface PayoutTransformation
+ */
+export interface PayoutTransformation {
+    /**
+     * The name of the transformation function to use.
+     * @type {string}
+     * @memberof PayoutTransformation
+     */
+    'f': PayoutTransformationFEnum;
+    /**
+     * The kwargs to pass to the transformation function.
+     * @type {PayoutTransformationPercentArgs}
+     * @memberof PayoutTransformation
+     */
+    'kwargs': PayoutTransformationPercentArgs;
+}
+
+export const PayoutTransformationFEnum = {
+    PayoutTransformationPercent: 'payout_transformation_percent'
+} as const;
+
+export type PayoutTransformationFEnum = typeof PayoutTransformationFEnum[keyof typeof PayoutTransformationFEnum];
+
+/**
+ * 
+ * @export
+ * @interface PayoutTransformationPercentArgs
+ */
+export interface PayoutTransformationPercentArgs {
+    /**
+     * The percentage of the bp_payout to pay the user
+     * @type {number}
+     * @memberof PayoutTransformationPercentArgs
+     */
+    'pct': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PayoutTransformationPercentArgs
+     */
+    'min_payout'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof PayoutTransformationPercentArgs
+     */
+    'max_payout'?: string | null;
+}
+/**
  * The method in which the requested payout is delivered.
  * @export
  * @enum {string}
@@ -1481,6 +2182,182 @@ export const PaypalCashoutMethodDataTypeEnum = {
 
 export type PaypalCashoutMethodDataTypeEnum = typeof PaypalCashoutMethodDataTypeEnum[keyof typeof PaypalCashoutMethodDataTypeEnum];
 
+/**
+ * 
+ * @export
+ * @interface Product
+ */
+export interface Product {
+    /**
+     * Unique identifier of the Brokerage Product
+     * @type {string}
+     * @memberof Product
+     */
+    'id'?: string;
+    /**
+     * Name of the Brokerage Product. Must be unique within a Team
+     * @type {string}
+     * @memberof Product
+     */
+    'name': string;
+    /**
+     * This is only used to hard block a Product in order to immediately & safely protect against fraud entrances.
+     * @type {boolean}
+     * @memberof Product
+     */
+    'enabled'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Product
+     */
+    'created'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Product
+     */
+    'team_id'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Product
+     */
+    'business_id'?: string | null;
+    /**
+     * Tags which are used to annotate supplier traffic
+     * @type {Set<SupplierTag>}
+     * @memberof Product
+     */
+    'tags'?: Set<SupplierTag>;
+    /**
+     * Where to redirect the user after finishing a session. When a user get redirected back to the supplier, a query param will be added with the name \'tsid\', and the value of the TSID for the session. For example: callback_uri: \'https://www.example.com/test/?a=1&b=2\' might result in the user getting redirected to: \'https://www.example.com/grl-callback/?a=1&b=2&tsid=c6ab6ba1e75b44e2bf5aab00fc68e3b7\'.
+     * @type {string}
+     * @memberof Product
+     */
+    'redirect_url': string;
+    /**
+     * This is the domain that is used for the GRS (General Research Survey) platform. This is a simple javascript application which may profile the respondent for anyprofiling questions, along with collecting any browserbased security information. The value is a scheme+domain only (no path).
+     * @type {string}
+     * @memberof Product
+     */
+    'harmonizer_domain'?: string;
+    /**
+     * 
+     * @type {SourcesConfig}
+     * @memberof Product
+     */
+    'sources_config'?: SourcesConfig;
+    /**
+     * 
+     * @type {SessionConfig}
+     * @memberof Product
+     */
+    'session_config'?: SessionConfig;
+    /**
+     * 
+     * @type {PayoutConfig}
+     * @memberof Product
+     */
+    'payout_config'?: PayoutConfig;
+    /**
+     * 
+     * @type {UserWalletConfig}
+     * @memberof Product
+     */
+    'user_wallet_config'?: UserWalletConfig;
+    /**
+     * 
+     * @type {UserCreateConfig}
+     * @memberof Product
+     */
+    'user_create_config'?: UserCreateConfig;
+    /**
+     * 
+     * @type {object}
+     * @memberof Product
+     */
+    'offerwall_config'?: object;
+    /**
+     * 
+     * @type {ProfilingConfig}
+     * @memberof Product
+     */
+    'profiling_config'?: ProfilingConfig;
+    /**
+     * 
+     * @type {UserHealthConfig}
+     * @memberof Product
+     */
+    'user_health_config'?: UserHealthConfig;
+    /**
+     * 
+     * @type {object}
+     * @memberof Product
+     */
+    'yield_man_config'?: object;
+    /**
+     * 
+     * @type {UserWalletConfig}
+     * @memberof Product
+     */
+    'user_wallet': UserWalletConfig;
+}
+/**
+ * 
+ * @export
+ * @interface ProfilingConfig
+ */
+export interface ProfilingConfig {
+    /**
+     * If False, the harmonizer/profiling system is not used at all. This should never be False unless special circumstances
+     * @type {boolean}
+     * @memberof ProfilingConfig
+     */
+    'enabled'?: boolean;
+    /**
+     * If grs_enabled is False, and is_grs is passed in the profiling-questions call,          then don\'t actually return any questions. This allows a client to hit the endpoint with no limit          and still get questions. In effect, this means that we\'ll redirect the user through the GRS         system but won\'t present them any questions.
+     * @type {boolean}
+     * @memberof ProfilingConfig
+     */
+    'grs_enabled'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProfilingConfig
+     */
+    'n_questions'?: number | null;
+    /**
+     * The max number of questions we would ask in a session
+     * @type {number}
+     * @memberof ProfilingConfig
+     */
+    'max_questions'?: number;
+    /**
+     * The average number of questions to ask in a session
+     * @type {number}
+     * @memberof ProfilingConfig
+     */
+    'avg_question_count'?: number;
+    /**
+     * Scale how frequently we inject profiling questions, relative to the default.1 is default, 2 is twice as often. 10 means always. 0.5 half as often
+     * @type {number}
+     * @memberof ProfilingConfig
+     */
+    'task_injection_freq_mult'?: number;
+    /**
+     * Non-us multiplier, used to increase freq and length of profilers in all non-us countries.This value is multiplied by task_injection_freq_mult and avg_question_count.
+     * @type {number}
+     * @memberof ProfilingConfig
+     */
+    'non_us_mult'?: number;
+    /**
+     * How frequently we should refresh hidden questions
+     * @type {number}
+     * @memberof ProfilingConfig
+     */
+    'hidden_questions_expiration_hours'?: number;
+}
 /**
  * 
  * @export
@@ -1619,6 +2496,170 @@ export interface QuestionOption {
     'label': string;
 }
 /**
+ * 
+ * @export
+ * @interface RaffleUserView
+ */
+export interface RaffleUserView {
+    /**
+     * Name of contest. Can be displayed to user.
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'description'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'contest_type'?: RaffleUserViewContestTypeEnum;
+    /**
+     * 
+     * @type {ContestEndCondition}
+     * @memberof RaffleUserView
+     */
+    'end_condition': ContestEndCondition;
+    /**
+     * 
+     * @type {Array<ContestPrize>}
+     * @memberof RaffleUserView
+     */
+    'prizes'?: Array<ContestPrize>;
+    /**
+     * When the contest starts
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'starts_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'terms_and_conditions'?: string | null;
+    /**
+     * 
+     * @type {ContestStatus}
+     * @memberof RaffleUserView
+     */
+    'status'?: ContestStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'country_isos'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'uuid'?: string;
+    /**
+     * Contest applies only to a single BP
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'product_id': string;
+    /**
+     * When this contest was created
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'created_at'?: string;
+    /**
+     * When this contest was last modified. Does not include entries being created/modified
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'ended_at'?: string | null;
+    /**
+     * 
+     * @type {ContestEndReason}
+     * @memberof RaffleUserView
+     */
+    'end_reason'?: ContestEndReason | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RaffleUserView
+     */
+    'product_user_id': string;
+    /**
+     * The prizes won in this contest by the requested user
+     * @type {Array<ContestWinner>}
+     * @memberof RaffleUserView
+     */
+    'user_winnings'?: Array<ContestWinner>;
+    /**
+     * 
+     * @type {ContestEntryType}
+     * @memberof RaffleUserView
+     */
+    'entry_type': ContestEntryType;
+    /**
+     * 
+     * @type {ContestEntryRule}
+     * @memberof RaffleUserView
+     */
+    'entry_rule'?: ContestEntryRule;
+    /**
+     * 
+     * @type {CurrentAmount}
+     * @memberof RaffleUserView
+     */
+    'current_amount'?: CurrentAmount;
+    /**
+     * Count of unique participants
+     * @type {number}
+     * @memberof RaffleUserView
+     */
+    'current_participants'?: number;
+    /**
+     * 
+     * @type {UserAmount}
+     * @memberof RaffleUserView
+     */
+    'user_amount': UserAmount;
+    /**
+     * 
+     * @type {UserAmountToday}
+     * @memberof RaffleUserView
+     */
+    'user_amount_today': UserAmountToday;
+    /**
+     * Probability of this user winning 1 or more prizes, if the contestended right now
+     * @type {number}
+     * @memberof RaffleUserView
+     */
+    'current_win_probability': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RaffleUserView
+     */
+    'projected_win_probability': number | null;
+}
+
+export const RaffleUserViewContestTypeEnum = {
+    Raffle: 'raffle'
+} as const;
+
+export type RaffleUserViewContestTypeEnum = typeof RaffleUserViewContestTypeEnum[keyof typeof RaffleUserViewContestTypeEnum];
+
+/**
  * Supported Currencies for Foreign Redemptions
  * @export
  * @enum {string}
@@ -1688,6 +2729,210 @@ export type ReportValue = typeof ReportValue[keyof typeof ReportValue];
 /**
  * 
  * @export
+ * @interface ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+ */
+export interface ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet {
+    /**
+     * Name of contest. Can be displayed to user.
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'contest_type'?: ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetContestTypeEnum;
+    /**
+     * 
+     * @type {MilestoneContestEndCondition}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'end_condition': MilestoneContestEndCondition;
+    /**
+     * 
+     * @type {Array<ContestPrize>}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'prizes'?: Array<ContestPrize>;
+    /**
+     * When the contest starts
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'starts_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'terms_and_conditions'?: string;
+    /**
+     * 
+     * @type {ContestStatus}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'status'?: ContestStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'country_isos'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'uuid'?: string;
+    /**
+     * Contest applies only to a single BP
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'product_id': string;
+    /**
+     * When this contest was created
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'created_at'?: string;
+    /**
+     * When this contest was last modified. Does not include entries being created/modified
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'updated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'ended_at'?: string;
+    /**
+     * 
+     * @type {ContestEndReason}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'end_reason'?: ContestEndReason;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'product_user_id': string;
+    /**
+     * The prizes won in this contest by the requested user
+     * @type {Array<ContestWinner>}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'user_winnings'?: Array<ContestWinner>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'entry_type': ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetEntryTypeEnum;
+    /**
+     * 
+     * @type {ContestEntryRule}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'entry_rule'?: ContestEntryRule;
+    /**
+     * 
+     * @type {CurrentAmount}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'current_amount'?: CurrentAmount;
+    /**
+     * Count of unique participants
+     * @type {number}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'current_participants'?: number;
+    /**
+     * The total amount for this user for this contest
+     * @type {number}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'user_amount': number;
+    /**
+     * 
+     * @type {UserAmountToday}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'user_amount_today': UserAmountToday;
+    /**
+     * Probability of this user winning 1 or more prizes, if the contestended right now
+     * @type {number}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'current_win_probability': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'projected_win_probability': number;
+    /**
+     * Each user \'wins\' (receives prizes) once this target amount is reached.
+     * @type {number}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'target_amount': number;
+    /**
+     * 
+     * @type {ContestEntryTrigger}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'entry_trigger'?: ContestEntryTrigger;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'valid_for'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'valid_for_event'?: ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetValidForEventEnum;
+    /**
+     * The number of times the milestone has been reached.
+     * @type {number}
+     * @memberof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet
+     */
+    'win_count'?: number;
+}
+
+export const ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetContestTypeEnum = {
+    Milestone: 'milestone'
+} as const;
+
+export type ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetContestTypeEnum = typeof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetContestTypeEnum[keyof typeof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetContestTypeEnum];
+export const ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetEntryTypeEnum = {
+    Count: 'count'
+} as const;
+
+export type ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetEntryTypeEnum = typeof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetEntryTypeEnum[keyof typeof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetEntryTypeEnum];
+export const ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetValidForEventEnum = {
+    Signup: 'signup'
+} as const;
+
+export type ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetValidForEventEnum = typeof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetValidForEventEnum[keyof typeof ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGetValidForEventEnum];
+
+/**
+ * 
+ * @export
  * @interface Selector
  */
 export interface Selector {
@@ -1707,6 +2952,31 @@ export const SessionAdjustedStatus = {
 export type SessionAdjustedStatus = typeof SessionAdjustedStatus[keyof typeof SessionAdjustedStatus];
 
 
+/**
+ * Stores configuration related to the Session, a session being a users experience attempting to do work.
+ * @export
+ * @interface SessionConfig
+ */
+export interface SessionConfig {
+    /**
+     * The amount of time (in seconds) that a respondent may spend attempting to get into a survey within a session.If NULL, there is no limit.
+     * @type {number}
+     * @memberof SessionConfig
+     */
+    'max_session_len'?: number;
+    /**
+     * The number of surveys that a respondent may attempt within a session before the session is terminated.
+     * @type {number}
+     * @memberof SessionConfig
+     */
+    'max_session_hard_retry'?: number;
+    /**
+     * The minimum amount the user should be paid for a complete. If          no payout transformation is defined, the value is based on the BP\'s payout.          If a payout transformation is defined, the min_payout is applied on the          user\'s payout. Note, this is separate and distinct from the payout          transformation\'s min payout. The payout transformation\'s min_payout does not          care what the task\'s actual payout was. This min_payout will prevent         the user from being show any tasks that would pay below this amount.
+     * @type {string}
+     * @memberof SessionConfig
+     */
+    'min_payout'?: string;
+}
 /**
  * __Status Detail__ This should be set if the Session.status_code_1 is SESSION_XXX_FAIL
  * @export
@@ -1952,6 +3222,82 @@ export const Source = {
 export type Source = typeof Source[keyof typeof Source];
 
 
+/**
+ * 
+ * @export
+ * @interface SourceConfig
+ */
+export interface SourceConfig {
+    /**
+     * 
+     * @type {Source}
+     * @memberof SourceConfig
+     */
+    'name': Source;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SourceConfig
+     */
+    'active'?: boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SourceConfig
+     */
+    'banned_countries'?: Array<string>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SourceConfig
+     */
+    'allow_mobile_ip'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SourceConfig
+     */
+    'supplier_id'?: string | null;
+    /**
+     * Allow Tasks from Buyers that want traffic that comes from Suppliers that can identify their users. Only supported on Pure Spectrum.
+     * @type {boolean}
+     * @memberof SourceConfig
+     */
+    'allow_pii_only_buyers'?: boolean;
+    /**
+     * Return Tasks from Buyers that don\'t have URL hashing enabled. Only supported on Pure Spectrum.
+     * @type {boolean}
+     * @memberof SourceConfig
+     */
+    'allow_unhashed_buyers'?: boolean;
+    /**
+     * For some Products, we may have privacy agreements prohibiting us from sharing information with the inventorySource. If True, don\'t add MRPQ (Market Research ProfilingQuestion) onto the entry link.
+     * @type {boolean}
+     * @memberof SourceConfig
+     */
+    'withhold_profiling'?: boolean;
+    /**
+     * Not used at the moment
+     * @type {boolean}
+     * @memberof SourceConfig
+     */
+    'pass_unconditional_eligible_unknowns'?: boolean;
+}
+
+
+/**
+ * Describes the marketplaces or sources that a BP can access and their respective configs
+ * @export
+ * @interface SourcesConfig
+ */
+export interface SourcesConfig {
+    /**
+     * 
+     * @type {Array<SourceConfig>}
+     * @memberof SourcesConfig
+     */
+    'user_defined'?: Array<SourceConfig>;
+}
 /**
  * An offerwall with buckets that are clustered by setting as seeds the highest scoring surveys for each bin, then the rest are distributed according to their Euclidean distance using the bucket\'s features.  Offerwall code: `b59a2d2b`
  * @export
@@ -2324,6 +3670,25 @@ export interface StatusSuccessFail {
      */
     'success'?: boolean;
 }
+/**
+ * Available tags which can be used to annotate supplier traffic  Note: should not include commas!
+ * @export
+ * @enum {string}
+ */
+
+export const SupplierTag = {
+    Mobile: 'mobile',
+    JsOfferwall: 'js-offerwall',
+    DoubleOptIn: 'double-opt-in',
+    SingleSignOn: 'single-sign-on',
+    PhoneNumberVerified: 'phone-number-verified',
+    TestA: 'test-a',
+    TestB: 'test-b'
+} as const;
+
+export type SupplierTag = typeof SupplierTag[keyof typeof SupplierTag];
+
+
 /**
  * 
  * @export
@@ -3533,6 +4898,58 @@ export interface User {
     'last_seen'?: string | null;
 }
 /**
+ * The total amount this user has entered
+ * @export
+ * @interface UserAmount
+ */
+export interface UserAmount {
+}
+/**
+ * The total amount this user has entered in the past 24 hours
+ * @export
+ * @interface UserAmountToday
+ */
+export interface UserAmountToday {
+}
+/**
+ * Stores configuration for the user creation experience.  The user creation limit is determined dynamically based on the median     daily completion rate. min_hourly_create_limit &     max_hourly_create_limit can be used to constrain the dynamically     determined rate limit within set values.
+ * @export
+ * @interface UserCreateConfig
+ */
+export interface UserCreateConfig {
+    /**
+     * The smallest allowed value for the hourly user create limit.
+     * @type {number}
+     * @memberof UserCreateConfig
+     */
+    'min_hourly_create_limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserCreateConfig
+     */
+    'max_hourly_create_limit'?: number | null;
+}
+/**
+ * 
+ * @export
+ * @interface UserHealthConfig
+ */
+export interface UserHealthConfig {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserHealthConfig
+     */
+    'banned_countries'?: Array<string>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UserHealthConfig
+     */
+    'allow_ban_iphist'?: boolean;
+}
+/**
  * 
  * @export
  * @interface UserInfo
@@ -4113,6 +5530,356 @@ export interface WXETOfferwallResponse {
      */
     'offerwall': WXETOfferwall;
 }
+
+/**
+ * ContestApi - axios parameter creator
+ * @export
+ */
+export const ContestApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Gets a Contest. Includes several keys that are specific to the requesting user:      e.g. user_winnings, user_amount.
+         * @summary Get Contest User View
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} contestUuid 
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getContestUserViewProductIdContestContestUuidUserProductUserIdGet: async (productId: string, contestUuid: string, productUserId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'productId' is not null or undefined
+            assertParamExists('getContestUserViewProductIdContestContestUuidUserProductUserIdGet', 'productId', productId)
+            // verify required parameter 'contestUuid' is not null or undefined
+            assertParamExists('getContestUserViewProductIdContestContestUuidUserProductUserIdGet', 'contestUuid', contestUuid)
+            // verify required parameter 'productUserId' is not null or undefined
+            assertParamExists('getContestUserViewProductIdContestContestUuidUserProductUserIdGet', 'productUserId', productUserId)
+            const localVarPath = `/{product_id}/contest/{contest_uuid}/user/{product_user_id}/`
+                .replace(`{${"product_id"}}`, encodeURIComponent(String(productId)))
+                .replace(`{${"contest_uuid"}}`, encodeURIComponent(String(contestUuid)))
+                .replace(`{${"product_user_id"}}`, encodeURIComponent(String(productUserId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get contests the requesting user is eligible for. Contest eligibility may involve the user\'s country, which is determined by the ip address     of THIS request.
+         * @summary List Contests User Eligible
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet: async (productId: string, productUserId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'productId' is not null or undefined
+            assertParamExists('listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet', 'productId', productId)
+            // verify required parameter 'productUserId' is not null or undefined
+            assertParamExists('listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet', 'productUserId', productUserId)
+            const localVarPath = `/{product_id}/contest/user/{product_user_id}/eligible/`
+                .replace(`{${"product_id"}}`, encodeURIComponent(String(productId)))
+                .replace(`{${"product_user_id"}}`, encodeURIComponent(String(productUserId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get contests the requesting user has entered. This includes contests such as milestone     contests where the user was automatically entered by having a complete for instance.
+         * @summary List Contests User Entered
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet: async (productId: string, productUserId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'productId' is not null or undefined
+            assertParamExists('listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet', 'productId', productId)
+            // verify required parameter 'productUserId' is not null or undefined
+            assertParamExists('listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet', 'productUserId', productUserId)
+            const localVarPath = `/{product_id}/contest/user/{product_user_id}/entered/`
+                .replace(`{${"product_id"}}`, encodeURIComponent(String(productId)))
+                .replace(`{${"product_user_id"}}`, encodeURIComponent(String(productUserId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get contests the requesting user has won a prize for.
+         * @summary List Contests User Winner
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet: async (productId: string, productUserId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'productId' is not null or undefined
+            assertParamExists('listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet', 'productId', productId)
+            // verify required parameter 'productUserId' is not null or undefined
+            assertParamExists('listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet', 'productUserId', productUserId)
+            const localVarPath = `/{product_id}/contest/user/{product_user_id}/winner/`
+                .replace(`{${"product_id"}}`, encodeURIComponent(String(productId)))
+                .replace(`{${"product_user_id"}}`, encodeURIComponent(String(productUserId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ContestApi - functional programming interface
+ * @export
+ */
+export const ContestApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ContestApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Gets a Contest. Includes several keys that are specific to the requesting user:      e.g. user_winnings, user_amount.
+         * @summary Get Contest User View
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} contestUuid 
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getContestUserViewProductIdContestContestUuidUserProductUserIdGet(productId: string, contestUuid: string, productUserId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getContestUserViewProductIdContestContestUuidUserProductUserIdGet(productId, contestUuid, productUserId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ContestApi.getContestUserViewProductIdContestContestUuidUserProductUserIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get contests the requesting user is eligible for. Contest eligibility may involve the user\'s country, which is determined by the ip address     of THIS request.
+         * @summary List Contests User Eligible
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet(productId, productUserId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ContestApi.listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get contests the requesting user has entered. This includes contests such as milestone     contests where the user was automatically entered by having a complete for instance.
+         * @summary List Contests User Entered
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet(productId, productUserId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ContestApi.listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get contests the requesting user has won a prize for.
+         * @summary List Contests User Winner
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet(productId, productUserId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ContestApi.listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ContestApi - factory interface
+ * @export
+ */
+export const ContestApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ContestApiFp(configuration)
+    return {
+        /**
+         * Gets a Contest. Includes several keys that are specific to the requesting user:      e.g. user_winnings, user_amount.
+         * @summary Get Contest User View
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} contestUuid 
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getContestUserViewProductIdContestContestUuidUserProductUserIdGet(productId: string, contestUuid: string, productUserId: string, options?: RawAxiosRequestConfig): AxiosPromise<ResponseGetContestUserViewProductIdContestContestUuidUserProductUserIdGet> {
+            return localVarFp.getContestUserViewProductIdContestContestUuidUserProductUserIdGet(productId, contestUuid, productUserId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get contests the requesting user is eligible for. Contest eligibility may involve the user\'s country, which is determined by the ip address     of THIS request.
+         * @summary List Contests User Eligible
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner>> {
+            return localVarFp.listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet(productId, productUserId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get contests the requesting user has entered. This includes contests such as milestone     contests where the user was automatically entered by having a complete for instance.
+         * @summary List Contests User Entered
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner>> {
+            return localVarFp.listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet(productId, productUserId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get contests the requesting user has won a prize for.
+         * @summary List Contests User Winner
+         * @param {string} productId The Brokerage Product ID provided by GRL.
+         * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ListContestsUserEnteredProductIdContestUserProductUserIdEnteredGet200ResponseInner>> {
+            return localVarFp.listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet(productId, productUserId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ContestApi - object-oriented interface
+ * @export
+ * @class ContestApi
+ * @extends {BaseAPI}
+ */
+export class ContestApi extends BaseAPI {
+    /**
+     * Gets a Contest. Includes several keys that are specific to the requesting user:      e.g. user_winnings, user_amount.
+     * @summary Get Contest User View
+     * @param {string} productId The Brokerage Product ID provided by GRL.
+     * @param {string} contestUuid 
+     * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ContestApi
+     */
+    public getContestUserViewProductIdContestContestUuidUserProductUserIdGet(productId: string, contestUuid: string, productUserId: string, options?: RawAxiosRequestConfig) {
+        return ContestApiFp(this.configuration).getContestUserViewProductIdContestContestUuidUserProductUserIdGet(productId, contestUuid, productUserId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get contests the requesting user is eligible for. Contest eligibility may involve the user\'s country, which is determined by the ip address     of THIS request.
+     * @summary List Contests User Eligible
+     * @param {string} productId The Brokerage Product ID provided by GRL.
+     * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ContestApi
+     */
+    public listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig) {
+        return ContestApiFp(this.configuration).listContestsUserEligibleProductIdContestUserProductUserIdEligibleGet(productId, productUserId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get contests the requesting user has entered. This includes contests such as milestone     contests where the user was automatically entered by having a complete for instance.
+     * @summary List Contests User Entered
+     * @param {string} productId The Brokerage Product ID provided by GRL.
+     * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ContestApi
+     */
+    public listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig) {
+        return ContestApiFp(this.configuration).listContestsUserEnteredProductIdContestUserProductUserIdEnteredGet(productId, productUserId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get contests the requesting user has won a prize for.
+     * @summary List Contests User Winner
+     * @param {string} productId The Brokerage Product ID provided by GRL.
+     * @param {string} productUserId A unique identifier for each user, which is set by the Supplier. Must be consistent across respondent entrances and unique to the platform. It should not contain any sensitive information like email or names, and should avoid using any incrementing values.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ContestApi
+     */
+    public listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet(productId: string, productUserId: string, options?: RawAxiosRequestConfig) {
+        return ContestApiFp(this.configuration).listContestsUserWinnerProductIdContestUserProductUserIdWinnerGet(productId, productUserId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
 
 /**
  * DashboardApi - axios parameter creator

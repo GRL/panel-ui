@@ -11,5 +11,5 @@ java -version
 
 wget https://fsb.generalresearch.com/openapi.json
 
-openapi-generator-cli generate -i ./openapi.json -g typescript-axios -o ./ --skip-validate-spec
+openapi-generator-cli generate -i ./openapi.json -g typescript-axios -o ./
 ```
