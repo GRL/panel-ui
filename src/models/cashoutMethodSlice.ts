@@ -12,7 +12,7 @@ const cashoutMethodSlice = createSlice({
         setCashoutMethods(state, action: PayloadAction<CashoutMethodOut[]>) {
             return action.payload;
         },
-        redeem: {
+        // redeemMethod: {
             //     let res = {'status': false, 'msg': ''};
             //     let cashout_method = this.collection.getCashoutMethod();
             //     let req_amt = +this.ui.amount.val();
@@ -61,7 +61,7 @@ const cashoutMethodSlice = createSlice({
             //     res["status"] = true;
             //     return res;
             // },
-        }
+        // }
     }
 })
 
@@ -73,6 +73,8 @@ export default cashoutMethodSlice.reducer
 export const selectCashoutMethods = (state: RootState) => state.cashoutMethods
 
 export const selectFixedCashoutMethods = (state: RootState) =>
+    // @ts-ignore
     state.cashoutMethods.filter(cm => cm.data.value_type === "fixed")
 export const selectVariableCashoutMethods = (state: RootState) =>
+    // @ts-ignore
     state.cashoutMethods.filter(cm => cm.data.value_type === "variable")

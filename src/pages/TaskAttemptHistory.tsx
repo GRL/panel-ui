@@ -14,7 +14,7 @@ export const TaskAttemptTable = () => {
         {
             accessorKey: "started",
             header: "Started",
-            cell: ({getValue}) => formatDistanceToNow(new Date(getValue()), {addSuffix: true})
+            cell: ({getValue}) => formatDistanceToNow(new Date(getValue() as string), {addSuffix: true})
         },
         {
             accessorKey: "finished",

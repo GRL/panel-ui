@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react'
 
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {CashoutMethodsResponse, WalletApi} from "@/api"
-import {CashoutMethodOut} from "@/api";
+import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
+import {CashoutMethodOut, CashoutMethodsResponse, WalletApi} from "@/api"
 import {useAppSelector} from "@/hooks.ts";
 
 const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethodOut }> = ({cashout_method}) => {
@@ -16,7 +15,7 @@ const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethodOut }> = ({c
             </CardHeader>
 
             <CardContent>
-                <img className="blur-xs grayscale" src={cashout_method.imageUrl}/>
+                <img className="blur-xs grayscale" src={cashout_method.image_url}/>
             </CardContent>
         </Card>
     )
@@ -41,7 +40,7 @@ const CommunityPage = () => {
         <div className="grid grid-cols-3 gap-1 p-1">
             {
                 cashoutMethods.map((m, index) => {
-                    return <CashoutMethodPreview key={index} cashout_method={m} />;
+                    return <CashoutMethodPreview key={index} cashout_method={m}/>;
                 })
             }
         </div>

@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {App, Page} from "@/models/app.ts"
 
 
-const initialState = {}
+const initialState: App = {} as App
 
 const appSlice = createSlice({
     name: 'app',

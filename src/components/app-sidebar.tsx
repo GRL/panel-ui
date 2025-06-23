@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import React from "react"
 import {CircleDollarSign, SquareStack} from "lucide-react"
 
 import {NavMain} from "@/components/nav-main"
@@ -14,9 +14,9 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
 } from "@/components/ui/sidebar"
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
+import {App} from "@/models/app.ts"
 import {setPage} from "@/models/appSlice.ts";
 import {Badge} from "@/components/ui/badge.tsx";
 import {useSelector} from "react-redux";
@@ -24,12 +24,10 @@ import {selectCashoutMethods} from "@/models/cashoutMethodSlice.ts";
 import {selectTransactionHistory} from "@/models/transactionHistorySlice.ts";
 
 export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
-    const app = useAppSelector(state => state.app)
+    const app: App = useAppSelector(state => state.app)
     const dispatch = useAppDispatch()
     const cashoutMethods = useSelector(selectCashoutMethods)
     const transactionHistory = useSelector(selectTransactionHistory)
-
-    const {isMobile} = useSidebar()
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>

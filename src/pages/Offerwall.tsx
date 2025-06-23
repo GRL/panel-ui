@@ -21,7 +21,7 @@ import {Card, CardContent, CardFooter} from "@/components/ui/card.tsx";
 import {makeSelectQuestionsByIds} from "@/models/questionSlice.ts"
 import {CheckIcon, MessageCircleQuestionIcon, XIcon} from "lucide-react"
 import {useAppDispatch, useAppSelector} from '@/hooks'
-import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet"
+import {Sheet, SheetContent, SheetDescription, SheetHeader , SheetTitle, SheetTrigger,} from "@/components/ui/sheet"
 import {ProfileQuestionFull} from "@/pages/Questions.tsx"
 import {Answer, selectAnswerForQuestion, submitAnswer} from "@/models/answerSlice.ts";
 import {assert, formatCentsToUSD, formatSeconds} from "@/lib/utils.ts";
@@ -47,7 +47,8 @@ const BucketStatus: React.FC<SoftPairBucket> = ({bucket}) => {
     }
 }
 
-const ContentsGrid: React.FC<SoftPairBucket> = ({bucket}) => {
+type ContentsGridProps = { bucket: SoftPairBucket };
+const ContentsGrid: React.FC<ContentsGridProps> = ({bucket}) => {
 
     const columns: ColumnDef<BucketTask>[] = [
         {
@@ -113,7 +114,9 @@ const ContentsGrid: React.FC<SoftPairBucket> = ({bucket}) => {
     )
 }
 
-const ConditionalQuestions: React.FC<SoftPairBucket> = ({bucket}) => {
+
+type ConditionalQuestionsProps = { bucket: SoftPairBucket };
+const ConditionalQuestions: React.FC<ConditionalQuestionsProps> = ({bucket}) => {
     const dispatch = useAppDispatch()
 
     const questions = useSelector(makeSelectQuestionsByIds(bucket.missing_questions))
@@ -162,28 +165,35 @@ const ConditionalQuestions: React.FC<SoftPairBucket> = ({bucket}) => {
                 Check Eligibility
             </Button>
 
-            <Sheet open={open} onOpenChange={setOpen}>
+            <Sheet
+                open={open}
+                onOpenChange={setOpen}
+            >
                 <SheetContent
                     side="right"
-                    className="md:w-[900px], lg:w-[1000px] p-5">
-
+                    className="p-5"
+                >
                     <SheetHeader>
-                        <SheetTitle>Bucket Questions</SheetTitle>
+                        <SheetTitle>
+                            Bucket Questions
+                        </SheetTitle>
                         <SheetDescription>
                             This survey has some unanswered questions. Answer these to determine if you're
                             eligible for the Survey Bucket
                         </SheetDescription>
                     </SheetHeader>
 
-                    {
-                        questions.map(q => {
-                            return <ProfileQuestionFull
-                                key={q.question_id}
-                                question={q}
-                                submitAnswerEvt={submitEvt}
-                                className="mt-4 m-2"/>
-                        })
-                    }
+                    <div className="h-full overflow-y-auto pr-5">
+                        {
+                            questions.map(q => {
+                                return <ProfileQuestionFull
+                                    key={q.question_id}
+                                    question={q}
+                                    submitAnswerEvt={submitEvt}
+                                    />
+                            })
+                        }
+                    </div>
 
                 </SheetContent>
             </Sheet>
@@ -191,13 +201,14 @@ const ConditionalQuestions: React.FC<SoftPairBucket> = ({bucket}) => {
     )
 }
 
-const CallToAction: React.FC<SoftPairBucket> = ({bucket}) => {
+type CallToActionProps = { bucket: SoftPairBucket };
+const CallToAction: React.FC<CallToActionProps> = ({bucket}) => {
     switch (bucket.eligibility) {
         case "unconditional":
             return (
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[90%]">
                     <Link
-                        href={bucket.uri}
+                        href={bucket.uri.toString()}
                         target="_blank"
                         className="w-full h-8 cursor-pointer"
                     >
@@ -231,7 +242,8 @@ const CallToAction: React.FC<SoftPairBucket> = ({bucket}) => {
     }
 }
 
-const ConditionalBucket: React.FC<SoftPairBucket> = ({bucket}) => {
+type ConditionalBucketProps = { bucket: SoftPairBucket };
+const ConditionalBucket: React.FC<ConditionalBucketProps> = ({bucket}) => {
     const [tab, setTab] = useState("bucket_cta")
     const toggleTab = () => setTab(tab === "bucket_cta" ? "bucket_details" : "bucket_cta")
 

@@ -1,10 +1,10 @@
-import React from 'react'
 import {
     BodySubmitProfilingQuestionsProductIdProfilingQuestionsPost,
     ProfilingQuestionsApiFactory,
     UpkQuestionChoice,
-    UserQuestionAnswerIn
+    UserQuestionAnswerIn,
 } from "@/api";
+import React from "react"
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
 import {addAnswer, Answer, saveAnswer, selectAnswerForQuestion, submitAnswer} from "@/models/answerSlice.ts";
@@ -30,6 +30,7 @@ import {
 } from "@/models/questionSlice.ts";
 import {assert} from "@/lib/utils.ts";
 import {motion} from "framer-motion"
+import {App} from "../models/app";
 
 const TextEntry: React.FC<{ question: ProfileQuestion }> = ({question}) => {
     const dispatch = useAppDispatch()
@@ -38,8 +39,9 @@ const TextEntry: React.FC<{ question: ProfileQuestion }> = ({question}) => {
     const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
     const error: Boolean = answer?.error_msg.length > 0
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(addAnswer({question: question, val: event.target.value}))
+    const handleInputChange = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        const target = event.target as HTMLInputElement;
+        dispatch(addAnswer({question, val: target.value as string}))
     };
 
     return (
@@ -119,7 +121,7 @@ export const ProfileQuestionFull: React.FC<{
     // const selectAnswer = useMemo(() => selectAnswerForQuestion(question), [question]);
     // const answer: Answer = useSelector(selectAnswer);
     const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
-    const app = useAppSelector(state => state.app)
+    const app: App = useAppSelector(state => state.app)
 
     const provided_answer = answer?.values.length > 0
     const error: Boolean = answer?.error_msg.length > 0
@@ -136,7 +138,7 @@ export const ProfileQuestionFull: React.FC<{
 
 
     return (
-        <Card className="@container/card relative overflow-hidden">
+        <Card className="@container/card relative overflow-hidden my-4 p-5">
             {answer && answer.processing && (
                 <motion.div
                     className="absolute top-0 left-0 h-0.5 bg-gray-300"
@@ -150,9 +152,9 @@ export const ProfileQuestionFull: React.FC<{
             <Badge
                 className="absolute top-2 right-2 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums cursor-pointer"
                 variant="outline"
-                title={`Currently ${(question.task_count ?? 0).toLocaleString()} surveys use this profiling question`}
+                title={`Currently ${(question.importance.task_count ?? 0).toLocaleString()} surveys use this profiling question`}
             >
-                {(question.task_count ?? 0).toLocaleString()}
+                {(question.importance?.task_count ?? 0).toLocaleString()}
             </Badge>
 
             <CardHeader>
@@ -183,7 +185,7 @@ const PaginationIcon: React.FC<{
     const answers = useAppSelector(state => state.answers)
     const completed: Boolean = Boolean(answers[question.question_id]?.complete)
 
-    const setQuestion = (evt) => {
+    const setQuestion = (evt: React.MouseEvent<HTMLAnchorElement>) => {
         if (completed) {
             evt.preventDefault()
         } else {
@@ -197,7 +199,7 @@ const PaginationIcon: React.FC<{
                 href="#"
                 title={question.question_text}
                 isActive={question.active}
-                aria-disabled={completed}
+                aria-disabled={!!completed}
 
                 onClick={setQuestion}
                 className={clsx("cursor-pointer border border-gray-100",
@@ -217,22 +219,24 @@ const QuestionsPage = () => {
     const dispatch = useAppDispatch()
 
     const questions = useSelector(selectQuestions)
-    const question = useSelector(selectFirstAvailableQuestion)
+    // @ts-ignore
+    const question: ProfileQuestion | null = useSelector(selectFirstAvailableQuestion)
     dispatch(setQuestionActive(question as ProfileQuestion))
 
     // This is saved now, so that if they click next it's ready. It
     // cannot be done within the click handler.
-    const nextQuestion = useSelector(selectNextAvailableQuestion)
+    // @ts-ignore
+    const nextQuestion: ProfileQuestion | null = useSelector(selectNextAvailableQuestion)
 
     const answer: Answer | undefined = useSelector(selectAnswerForQuestion(question));
-    const app = useAppSelector(state => state.app)
+    const app: App = useAppSelector(state => state.app)
 
     const clickNext = () => {
         // TODO: if nextQuestion was already submitted, skip it!
         if (nextQuestion) {
             // TS is not smart enough to know that the if statement above
             // prevents this from ever being null
-            dispatch(setQuestionActive(nextQuestion as ProfileQuestion))
+            dispatch(setQuestionActive(nextQuestion))
         } else {
             // What do we do now... no more questions left to do.
         }
@@ -278,7 +282,7 @@ const QuestionsPage = () => {
             } as UserQuestionAnswerIn
             ]
         }
-        new ProfilingQuestionsApiFactory().submitProfilingQuestionsProductIdProfilingQuestionsPost(app.bpid, app.bpuid, body)
+        ProfilingQuestionsApiFactory().submitProfilingQuestionsProductIdProfilingQuestionsPost(app.bpid, app.bpuid, body)
             .then(res => {
                 if (res.status == 200) {
                     dispatch(saveAnswer({question: question}))
@@ -318,7 +322,7 @@ const QuestionsPage = () => {
                 key={question.question_id}
                 question={question}
                 submitAnswerEvt={submitAnswerEvt}
-                className="mt-4 mb-4"/>
+            />
         </>
     )
 }

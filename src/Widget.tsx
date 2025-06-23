@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import {useEffect} from 'react'
 import {AppSidebar} from "@/components/app-sidebar"
 import {SiteHeader} from "@/components/site-header"
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar"
@@ -32,6 +32,7 @@ import {setUpkAnswers} from "@/models/userUpkAnswerSlice.ts";
 import {setMarketplaceAnswers} from "@/models/userMarketplaceAnswerSlice.ts";
 import {setUserProfile} from "@/models/userProfileSlice.ts";
 import {setTaskStatuses} from "@/models/taskStatusSlice.ts"
+import {App} from "@/models/app.ts"
 
 import './index.css';
 
@@ -39,7 +40,7 @@ import './index.css';
 const Widget = () => {
 
     const dispatch = useAppDispatch()
-    const app = useAppSelector(state => state.app)
+    const app: App = useAppSelector(state => state.app)
 
     useEffect(() => {
         // https://fsb.generalresearch.com/{product_id}/offerwall/37d1da64/?country
@@ -96,7 +97,7 @@ const Widget = () => {
             .then(res => {
                 dispatch(setWallet(res.data.wallet as UserWalletBalance))
             })
-            .catch(err => {
+            .catch(() => {
                 // TODO: Wallet mode is likely off
             })
 

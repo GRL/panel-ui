@@ -2,7 +2,6 @@ import {createRoot} from 'react-dom/client'
 import {Widget} from './Widget'
 import {App} from "@/models/app.ts"
 import {Provider} from 'react-redux'
-import React from 'react'
 
 import {store} from './store'
 import {setApp} from "@/models/appSlice.ts";
@@ -27,7 +26,7 @@ import {setApp} from "@/models/appSlice.ts";
         leaderboard: Boolean(currentScript?.getAttribute("data-leaderboard")) || false,
 
         currentPage: "offerwall"
-    }
+    } as App
     store.dispatch(setApp(settings))
 
     // Avoid adding the widget multiple times

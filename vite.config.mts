@@ -4,7 +4,6 @@ import react from "@vitejs/plugin-react"
 import {defineConfig} from "vite"
 import {viteSingleFile} from "vite-plugin-singlefile"
 
-// https://vite.dev/config/
 export default defineConfig({
 
     plugins: [react(), tailwindcss(), viteSingleFile()],
@@ -17,6 +16,7 @@ export default defineConfig({
         host: "0.0.0.0",
         port: 8080,
     },
+
     build: {
         target: "es2015",
         lib: {

@@ -116,6 +116,7 @@ const CashoutMethodPreview: React.FC<{ cashout_method: CashoutMethodOut }> = ({c
     const [open, setOpen] = useState(false)
 
     const renderContent = () => {
+        // @ts-ignore
         switch (cashout_method.data.value_type) {
             case 'fixed':
                 return <FixedCashoutMethodPreview cashout_method={cashout_method}/>

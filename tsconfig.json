@@ -1,13 +1,26 @@
 {
+  // Core TypeScript compiler configuration.
+  // --  Central to type checking, used by Vite, Jest, and ESLint.
+  "exclude": [
+    "dist",
+    "src/api/"
+  ],
+
   "files": [],
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    {
+      "path": "./tsconfig.build.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
   ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   }
 }

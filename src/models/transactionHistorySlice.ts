@@ -18,7 +18,7 @@ const transactionHistorySlice = createSlice({
     }
 })
 
-export const {setBuckets, bucketAdded} = transactionHistorySlice.actions;
+export const {setBuckets, transactionAdded} = transactionHistorySlice.actions;
 export default transactionHistorySlice.reducer
 
 export const selectTransactionHistory = (state: RootState) => state.transactionHistory

@@ -1,6 +1,5 @@
 import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
-import React from "react";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -40,4 +39,28 @@ export function titleCase(str: string): string {
         .split(" ")
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
+}
+
+export enum Status {
+    UNKNOWN = 0,
+    ENTER = 1,
+    INCOMPLETE = 2,
+    COMPLETE = 3
+}
+
+export enum AdjustmentTypes {
+    ac = "ADJUSTED_TO_COMPLETE",
+    af = "ADJUSTED_TO_FAIL",
+    pa = "PAYOUT_ADJUSTMENT"
+}
+
+export enum Source {
+    g = "GRS",
+    c = "Cint",
+    // "a"
+    d = "Dynata",
+    // "et" "f"
+    i = "Innovate",
+    // "l" "m" "n" "o" "e" "r" "pr" "p" "rd" "h" "s" "t" "u"
+    w = "WXET",
 }

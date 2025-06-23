@@ -1,11 +1,11 @@
 import {Separator} from "@/components/ui/separator"
 import {SidebarTrigger} from "@/components/ui/sidebar"
-import React from "react";
 import {useAppSelector} from "@/hooks.ts";
+import {App} from "@/models/app.ts"
 import {Offerwall} from "@/pages/Offerwall.tsx";
 
 const SiteHeader = () => {
-    const app = useAppSelector(state => state.app)
+    const app: App = useAppSelector(state => state.app)
 
     return (
         <header
@@ -22,7 +22,7 @@ const SiteHeader = () => {
                     {app.currentPage === 'questions' && "Profiling Questions"}
                     {app.currentPage === 'demographics' && "User Demographics"}
                     {app.currentPage === 'task_attempts' && "Task Attempts"}
-                    {app.currentPage === 'cashouts' && "Cashout Methods"}
+                    {app.currentPage === 'cashout_methods' && "Cashout Methods"}
                     {app.currentPage === 'transaction_history' && 'Transaction History'}
                 </h1>
 

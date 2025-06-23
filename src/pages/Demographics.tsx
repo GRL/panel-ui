@@ -6,14 +6,14 @@ import { formatDistanceToNow } from 'date-fns'
 
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {Calendar, MapPin, User, PersonStanding} from "lucide-react";
-import {BucketTask, UserProfile} from "@/api";
+import {UserProfileKnowledge, UserProfile} from "@/api";
 import {ColumnDef, flexRender, getCoreRowModel, useReactTable} from "@tanstack/react-table";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {useAppSelector} from "@/hooks.ts";
 
 export const UpkGrid = () => {
 
-    const columns: ColumnDef<BucketTask>[] = [
+    const columns: ColumnDef<UserProfileKnowledge>[] = [
         {
             accessorKey: "property_label",
             header: "Label",

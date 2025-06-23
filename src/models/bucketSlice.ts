@@ -21,9 +21,5 @@ const bucketSlice = createSlice({
 export const {setBuckets, bucketAdded} = bucketSlice.actions;
 export default bucketSlice.reducer
 
-export const selectBucketsStatus = (state: RootState) => state.buckets.status
-export const selectBucketsError = (state: RootState) => state.buckets.error
-export const selectAllBuckets = (state: RootState) => state.buckets
-
 export const selectBucketById = (state: RootState, bucketId: string | null) =>
     state.buckets.find(bucket => bucket.id === bucketId)

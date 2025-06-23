@@ -6,7 +6,7 @@ import {assert} from "@/lib/utils.ts"
 import {Selector} from "react-redux";
 
 export interface ProfileQuestion extends UpkQuestion {
-    active: false
+    active: boolean
 }
 
 const initialState: ProfileQuestion[] = []
@@ -20,7 +20,11 @@ const questionSlice = createSlice({
         // },
         setQuestions(state, action: PayloadAction<ProfileQuestion[]>) {
             const existingIds = new Set(state.map(q => q.question_id));
-            const newQuestions = action.payload.filter(q => !existingIds.has(q.question_id));
+            const newQuestions = action.payload.filter(q => !existingIds.has(q.question_id)).map((q) => ({
+                ...q,
+                active: false,
+            }));
+
             state.push(...newQuestions);
         },
         questionAdded(state, action: PayloadAction<ProfileQuestion>) {
@@ -72,9 +76,9 @@ export const makeSelectQuestionsByIds = (ids: string[]) =>
 export const selectActiveQuestion = (state: RootState) => state.questions.find(i => i.active)
 export const selectAnswers = (state: RootState) => state.answers
 
-export const selectFirstAvailableQuestion = createSelector(
+export const selectFirstAvailableQuestion: Selector<RootState, ProfileQuestion | null> = createSelector(
     [selectQuestions, selectAnswers],
-    (questions, answers): Selector<RootState, ProfileQuestion | null> => {
+    (questions, answers) => {
         /*  This is used when the app loads up the Questions page and we
             need to find the first Question that we'll present to
             the Respondent.
@@ -99,9 +103,9 @@ export const selectFirstAvailableQuestion = createSelector(
     }
 )
 
-export const selectNextAvailableQuestion = createSelector(
+export const selectNextAvailableQuestion: Selector<RootState, ProfileQuestion | null> = createSelector(
     [selectQuestions, selectAnswers],
-    (questions, answers): Selector<RootState, ProfileQuestion | null> => {
+    (questions, answers) => {
         /*  This takes the current active position and finds the next available
             question to answer.
 
