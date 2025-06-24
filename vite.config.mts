@@ -1,12 +1,18 @@
 import path from "path"
-import tailwindcss from "@tailwindcss/vite"
+// import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import {defineConfig} from "vite"
-import {viteSingleFile} from "vite-plugin-singlefile"
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
+
+// ESM-compatible imports
+// const tailwindcss = (await import('tailwindcss')).default
+const tailwindcss = (await import('@tailwindcss/postcss')).default
+const autoprefixer = (await import('autoprefixer')).default
+const cssnano = (await import('cssnano')).default
 
 export default defineConfig({
 
-    plugins: [react(), tailwindcss(), viteSingleFile()],
+    plugins: [cssInjectedByJsPlugin(), react()],
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./src"),
@@ -17,16 +23,46 @@ export default defineConfig({
         port: 8080,
     },
 
+    css: {
+        postcss: {
+            plugins: [
+                tailwindcss,
+                autoprefixer,
+                cssnano({
+                    preset: ['default', {
+                        discardComments: { removeAll: true },
+                    }],
+                }),
+            ],
+        }
+    },
+
+    define: {
+        'process.env.NODE_ENV': JSON.stringify('production')
+    },
+
     build: {
         target: "es2015",
+        minify: 'terser',
+        cssCodeSplit: false,
+        terserOptions: {
+            format: {
+                comments: false,
+            },
+            compress: {
+                drop_console: true,
+                drop_debugger: true
+            }
+        },
         lib: {
             entry: 'src/main.tsx',
             name: 'GRLWidget',
             formats: ['iife'],
-            fileName: 'my-widget.js'
+            fileName: 'my-widget'
         },
         rollupOptions: {
             output: {
+                entryFileNames: 'grl-panel.js',
                 globals: {
                     react: 'React',
                     'react-dom': 'ReactDOM'

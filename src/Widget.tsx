@@ -1,5 +1,5 @@
-import {useEffect} from 'react'
-import {AppSidebar} from "@/components/app-sidebar"
+import { useEffect, useState, useRef } from "react"
+
 import {SiteHeader} from "@/components/site-header"
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar"
 import {Offerwall} from "@/pages/Offerwall.tsx"
@@ -8,6 +8,7 @@ import {Demographics} from "@/pages/Demographics.tsx"
 import {CashoutMethodsPage} from "@/pages/CashoutMethods.tsx";
 import {TransactionHistoryPage} from "@/pages/TransactionHistory.tsx"
 import {TaskAttemptHistoryPage} from "@/pages/TaskAttemptHistory.tsx";
+import {AppSidebar} from "@/components/app-sidebar"
 
 import {useAppDispatch, useAppSelector} from "@/hooks.ts";
 import {
@@ -33,11 +34,34 @@ import {setMarketplaceAnswers} from "@/models/userMarketplaceAnswerSlice.ts";
 import {setUserProfile} from "@/models/userProfileSlice.ts";
 import {setTaskStatuses} from "@/models/taskStatusSlice.ts"
 import {App} from "@/models/app.ts"
+import {ScrollArea} from "@/components/ui/scroll-area"
 
 import './index.css';
 
+export function useParentHeight() {
+    const ref = useRef<HTMLDivElement>(null)
+    const [height, setHeight] = useState<number | null>(null)
+
+    useEffect(() => {
+        if (!ref.current) return
+
+        const observer = new ResizeObserver(() => {
+            if (ref.current?.parentElement) {
+                const h = ref.current.parentElement.getBoundingClientRect().height
+                setHeight(h)
+            }
+        })
+
+        observer.observe(ref.current.parentElement!)
+
+        return () => observer.disconnect()
+    }, [])
+
+    return { ref, height }
+}
 
 const Widget = () => {
+    const { ref, height } = useParentHeight()
 
     const dispatch = useAppDispatch()
     const app: App = useAppSelector(state => state.app)
@@ -103,31 +127,29 @@ const Widget = () => {
 
     }, []); // ← empty array means "run once"
 
-
     return (
-        <SidebarProvider>
-            <AppSidebar variant="floating"/>
-            <SidebarInset>
-                <SiteHeader/>
+        <div ref={ref} className="w-full h-full bg-white rounded-lg shadow relative">
+            <SidebarProvider className="bg-blend-darken h-full flex flex-1" style={{ height }}>
+                <AppSidebar className="h-full" style={{ height }}/>
 
-                <div className="flex flex-1 flex-col">
-                    <div className="@container/main flex flex-1 flex-col gap-2">
+                <SidebarInset className="h-full" style={{ height }}>
+                    <SiteHeader/>
+                    <ScrollArea className="overflow-auto px-4" style={{ maxHeight: height ? height - 24 : undefined }}>
                         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                            <div className="px-4 lg:px-6">
+                            <div className="px-4 lg:px-6 bg-white">
                                 {app.currentPage === 'offerwall' && <Offerwall/>}
                                 {app.currentPage === 'questions' && <QuestionsPage/>}
                                 {app.currentPage === 'cashout_methods' && <CashoutMethodsPage/>}
                                 {app.currentPage === 'task_attempts' && <TaskAttemptHistoryPage/>}
-
                                 {app.currentPage === 'demographics' && <Demographics/>}
                                 {app.currentPage === 'transaction_history' && <TransactionHistoryPage/>}
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </ScrollArea>
 
-            </SidebarInset>
-        </SidebarProvider>
+                </SidebarInset>
+            </SidebarProvider>
+        </div>
     )
 }
 

@@ -4,11 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-#testD4rN {
-  max-width: 800px;
-  max-height: 400px !important;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -145,4 +140,16 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+#testD4rN {
+  /*max-width: 800px;*/
+  /*max-height: 400px !important;*/
+
+  height: 500px;
+  width: 800px;
+  border: 1px solid red;
+  position: absolute;
+  top: 80px;
+  left: 80px;
 }

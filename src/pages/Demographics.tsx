@@ -101,7 +101,7 @@ export const ContactCard = () => {
             <CardContent className="space-y-2 pt-2">
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <User className="w-4 h-4"/>
-                    <span>{titleCase(gender as string) ?? " - "}</span>
+                    <span>{titleCase(gender ?? " - " as string)}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4"/>

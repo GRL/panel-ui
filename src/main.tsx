@@ -6,6 +6,8 @@ import {Provider} from 'react-redux'
 import {store} from './store'
 import {setApp} from "@/models/appSlice.ts";
 
+import "@/index.css"
+
 (function () {
 
     // Finding the script tag on the page..
@@ -42,9 +44,9 @@ import {setApp} from "@/models/appSlice.ts";
     const root = createRoot(container)
     root.render(
         // <React.StrictMode>
-            <Provider store={store}>
-                <Widget/>
-            </Provider>
+        <Provider store={store}>
+            <Widget/>
+        </Provider>
         // </React.StrictMode>
     );
 
