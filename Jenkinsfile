@@ -5,9 +5,6 @@ pipeline {
         skipDefaultCheckout()
     }
 
-    environment {
-    }
-
     stages {
         stage('setup'){
             steps {
