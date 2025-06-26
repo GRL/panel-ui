@@ -38,6 +38,27 @@ pipeline {
                 }
             }
         }
+
+        stage('npm.build') {
+              when {
+                expression { env.BRANCH_NAME == 'master' }
+              }
+              steps {
+                sh "/usr/local/bin/npm run build"
+
+                script {
+                    def filePath = "dist/grl-panel.js"
+                    def minSize = 500 * 1024
+                    def size = sh(script: "stat -c%s ${filePath}", returnStdout: true).trim().toInteger()
+
+                    if (size < minSize) {
+                        error "Build ${filePath} is too small: ${size} bytes"
+                    } else {
+                        echo "Build size is acceptable: ${size} bytes"
+                    }
+                }
+              }
+        }
     }
 
 }
