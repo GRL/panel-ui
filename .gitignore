@@ -26,3 +26,8 @@ node_modules
 .onedev-buildspec.yml
 index.html
 package-lock.json
+
+/src/api/openapi.json
+/src/api/node_modules
+/src/api/docs
+/src/api/.openapi-generator
