@@ -60,6 +60,18 @@ pipeline {
                 }
             }
         }
+
+        stage('cdn deploy') {
+            when {
+                expression { env.BRANCH_NAME == 'master' }
+            }
+            steps {
+                dir("panel-ui") {
+                    sh "/usr/bin/rsync -v dist/grl-panel.js grl-cdn:/root/gr-cdn/"
+                }
+            }
+        }
+
     }
 
 }
