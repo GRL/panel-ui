@@ -40,24 +40,25 @@ pipeline {
         }
 
         stage('npm.build') {
-              when {
+            when {
                 expression { env.BRANCH_NAME == 'master' }
-              }
-              steps {
-                sh "/usr/local/bin/npm run build"
+            }
+            steps {
+                dir("panel-ui") {
+                    sh "/usr/local/bin/npm run build"
+                    script {
+                        def filePath = "dist/grl-panel.js"
+                        def minSize = 500 * 1024
+                        def size = sh(script: "stat -c%s ${filePath}", returnStdout: true).trim().toInteger()
 
-                script {
-                    def filePath = "dist/grl-panel.js"
-                    def minSize = 500 * 1024
-                    def size = sh(script: "stat -c%s ${filePath}", returnStdout: true).trim().toInteger()
-
-                    if (size < minSize) {
-                        error "Build ${filePath} is too small: ${size} bytes"
-                    } else {
-                        echo "Build size is acceptable: ${size} bytes"
+                        if (size < minSize) {
+                            error "Build ${filePath} is too small: ${size} bytes"
+                        } else {
+                            echo "Build size is acceptable: ${size} bytes"
+                        }
                     }
                 }
-              }
+            }
         }
     }
 
