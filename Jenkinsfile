@@ -90,10 +90,11 @@ pipeline {
                         def branch = env.BRANCH_NAME
                         echo "Detected branch: ${branch}"
                         def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${branch}.js"
+
                         sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
+                        sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned}.js grl-cdn:/root/gr-cdn/"
                     }
 
-                    sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned}.js grl-cdn:/root/gr-cdn/"
                 }
             }
         }
@@ -111,10 +112,10 @@ pipeline {
                         def tag = env.TAG_NAME
                         echo "Detected tag: ${tag}"
                         def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${tag}.js"
-                        sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
-                    }
 
-                    sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned} grl-cdn:/root/gr-cdn/"
+                        sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
+                        sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned} grl-cdn:/root/gr-cdn/"
+                    }
 
                 }
             }
