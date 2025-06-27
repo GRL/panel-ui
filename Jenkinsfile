@@ -15,11 +15,6 @@ pipeline {
     }
 
     stages {
-        stage('debug env') {
-            steps {
-                sh 'env | sort'
-            }
-        }
 
         stage('setup'){
             steps {
@@ -56,10 +51,14 @@ pipeline {
 
         stage('npm.build') {
             when {
+                /*  Only build the widget if we're on master or if it's a tag.. otherwise, we don't
+                    currently have a reason to build dev branch for testing purposes
+                */
                 expression {
-                    return env.BRANCH_NAME == 'master' || buildingTag()
+                    return env.BRANCH_NAME == 'master' || env.TAG_NAME?.trim()
                 }
             }
+
             steps {
                 dir("panel-ui") {
                     sh "/usr/local/bin/npm run build"
@@ -78,7 +77,7 @@ pipeline {
             }
         }
 
-        stage('cdn.deploy') {
+        stage('cdn.deploy.master') {
             when {
                 expression { env.BRANCH_NAME == 'master' }
             }
@@ -89,14 +88,35 @@ pipeline {
             }
         }
 
-        stage('cdn.deploy.tagged-version') {
+        stage('cdn.deploy.non-master') {
             when {
-                buildingTag()
+                expression { env.BRANCH_NAME != 'master' }
             }
             steps {
                 dir("panel-ui") {
                     script {
-                        def tag = env.GIT_TAG_NAME ?: env.GIT_BRANCH.replaceFirst(/^origin\//, '')
+                        def branch = env.BRANCH_NAME
+                        echo "Detected branch: ${branch}"
+                        def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${branch}.js"
+                        sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
+                    }
+
+                    sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned}.js grl-cdn:/root/gr-cdn/"
+                }
+            }
+        }
+
+        stage('cdn.deploy.tag') {
+            when {
+                expression {
+                    return env.TAG_NAME?.trim()
+                }
+            }
+
+            steps {
+                dir("panel-ui") {
+                    script {
+                        def tag = env.TAG_NAME
                         echo "Detected tag: ${tag}"
                         def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${tag}.js"
                         sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
