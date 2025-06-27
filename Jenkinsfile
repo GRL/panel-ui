@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+      pollSCM('H/1 * * * *')
+    }
+
     environment {
         BUILD_DIR = "dist"
         JS_FILENAME = "grl-panel"
