@@ -15,6 +15,12 @@ pipeline {
     }
 
     stages {
+        stage('debug env') {
+            steps {
+                sh 'env | sort'
+            }
+        }
+
         stage('setup'){
             steps {
                 cleanWs()
@@ -50,7 +56,9 @@ pipeline {
 
         stage('npm.build') {
             when {
-                expression { env.BRANCH_NAME == 'master' }
+                expression {
+                    return env.BRANCH_NAME == 'master' || buildingTag()
+                }
             }
             steps {
                 dir("panel-ui") {
