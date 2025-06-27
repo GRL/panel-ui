@@ -50,14 +50,6 @@ pipeline {
         }
 
         stage('npm.build') {
-            when {
-                /*  Only build the widget if we're on master or if it's a tag.. otherwise, we don't
-                    currently have a reason to build dev branch for testing purposes
-                */
-                expression {
-                    return env.BRANCH_NAME == 'master' || env.TAG_NAME?.trim()
-                }
-            }
 
             steps {
                 dir("panel-ui") {
