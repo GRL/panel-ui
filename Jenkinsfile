@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        BUILD_DIR = "dist"
+        JS_FILENAME = "grl-panel"
+    }
+
     options {
         skipDefaultCheckout()
     }
@@ -61,13 +66,32 @@ pipeline {
             }
         }
 
-        stage('cdn deploy') {
+        stage('cdn.deploy') {
             when {
                 expression { env.BRANCH_NAME == 'master' }
             }
             steps {
                 dir("panel-ui") {
-                    sh "/usr/bin/rsync -v dist/grl-panel.js grl-cdn:/root/gr-cdn/"
+                    sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${env.JS_FILENAME}.js grl-cdn:/root/gr-cdn/"
+                }
+            }
+        }
+
+        stage('cdn.deploy.tagged-version') {
+            when {
+                buildingTag()
+            }
+            steps {
+                dir("panel-ui") {
+                    script {
+                        def tag = env.GIT_TAG_NAME ?: env.GIT_BRANCH.replaceFirst(/^origin\//, '')
+                        echo "Detected tag: ${tag}"
+                        def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${tag}.js"
+                        sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
+                    }
+
+                    sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned} grl-cdn:/root/gr-cdn/"
+
                 }
             }
         }
