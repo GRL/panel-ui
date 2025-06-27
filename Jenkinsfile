@@ -55,14 +55,15 @@ pipeline {
                 dir("panel-ui") {
                     sh "/usr/local/bin/npm run build"
                     script {
-                        def filePath = "dist/grl-panel.js"
-                        def minSize = 500 * 1024
-                        def size = sh(script: "stat -c%s ${filePath}", returnStdout: true).trim().toInteger()
+                        dir(env.BUILD_DIR) {
+                            def minSize = 750 * 1024
+                            def size = sh(script: "stat -c%s ${env.JS_FILENAME}.js", returnStdout: true).trim().toInteger()
 
-                        if (size < minSize) {
-                            error "Build ${filePath} is too small: ${size} bytes"
-                        } else {
-                            echo "Build size is acceptable: ${size} bytes"
+                            if (size < minSize) {
+                                error "Build is too small: ${size} bytes"
+                            } else {
+                                echo "Build size is acceptable: ${size} bytes"
+                            }
                         }
                     }
                 }
@@ -75,7 +76,9 @@ pipeline {
             }
             steps {
                 dir("panel-ui") {
-                    sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${env.JS_FILENAME}.js grl-cdn:/root/gr-cdn/"
+                    dir(env.BUILD_DIR) {
+                        sh "/usr/bin/rsync -v ${env.JS_FILENAME}.js grl-cdn:/root/gr-cdn/"
+                    }
                 }
             }
         }
@@ -87,12 +90,13 @@ pipeline {
             steps {
                 dir("panel-ui") {
                     script {
-                        def branch = env.BRANCH_NAME
-                        echo "Detected branch: ${branch}"
-                        def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${branch}.js"
+                        echo "Detected branch: ${env.BRANCH_NAME}"
+                        def versioned = "${env.JS_FILENAME}-${env.BRANCH_NAME}"
 
-                        sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
-                        sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned}.js grl-cdn:/root/gr-cdn/"
+                        dir(env.BUILD_DIR) {
+                            sh "cp ${env.JS_FILENAME}.js ${versioned}.js"
+                            sh "/usr/bin/rsync -v ${versioned}.js grl-cdn:/root/gr-cdn/"
+                        }
                     }
 
                 }
@@ -109,12 +113,13 @@ pipeline {
             steps {
                 dir("panel-ui") {
                     script {
-                        def tag = env.TAG_NAME
-                        echo "Detected tag: ${tag}"
-                        def versioned = "${env.BUILD_DIR}/${env.JS_FILENAME}-${tag}.js"
+                        echo "Detected tag: ${env.TAG_NAME}"
+                        def versioned = "${env.JS_FILENAME}-${env.TAG_NAME}"
 
-                        sh "cp ${env.BUILD_DIR}/${env.JS_FILENAME}.js ${versioned}"
-                        sh "/usr/bin/rsync -v ${env.BUILD_DIR}/${versioned} grl-cdn:/root/gr-cdn/"
+                        dir(env.BUILD_DIR) {
+                            sh "cp ${env.JS_FILENAME}.js ${versioned}.js"
+                            sh "/usr/bin/rsync -v ${versioned}.js grl-cdn:/root/gr-cdn/"
+                        }
                     }
 
                 }
